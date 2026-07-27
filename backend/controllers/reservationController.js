@@ -52,7 +52,7 @@ exports.createReservation = async (req, res) => {
       // Password dibuat random/dummy karena mereka tidak perlu login
       const dummyPassword = crypto.randomBytes(8).toString("hex");
       const [newUser] = await db.query(
-        'INSERT INTO users (name, phone, password, role) VALUES (?, ?, ?, "customer")',
+        "INSERT INTO users (name, phone, password, role) VALUES (?, ?, ?, 'customer')",
         [customer_name, customer_phone, dummyPassword],
       );
       customer_id = newUser.insertId;
@@ -64,7 +64,7 @@ exports.createReservation = async (req, res) => {
 
     // Prevent double booking
     const [existingBookings] = await db.query(
-      'SELECT id FROM reservations WHERE kapster_id = ? AND booking_date = ? AND booking_time = ? AND status != "cancelled"',
+      "SELECT id FROM reservations WHERE kapster_id = ? AND booking_date = ? AND booking_time = ? AND status != 'cancelled'",
       [kapster_id, booking_date, booking_time],
     );
 
@@ -78,7 +78,7 @@ exports.createReservation = async (req, res) => {
     }
 
     const [result] = await db.query(
-      'INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, booking_date, booking_time, status) VALUES (?, ?, ?, ?, ?, ?, "pending")',
+      "INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, booking_date, booking_time, status) VALUES (?, ?, ?, ?, ?, ?, 'pending')",
       [
         ticket_code,
         customer_id,
@@ -186,7 +186,7 @@ exports.getBookedTimes = async (req, res) => {
       `SELECT r.booking_time, s.name as service_name 
        FROM reservations r
        LEFT JOIN services s ON r.service_id = s.id
-       WHERE r.kapster_id = ? AND r.booking_date = ? AND r.status != "cancelled"`,
+       WHERE r.kapster_id = ? AND r.booking_date = ? AND r.status != 'cancelled'`,
       [kapster_id, date],
     );
 
@@ -243,7 +243,7 @@ exports.cancelReservationByTicket = async (req, res) => {
     }
 
     await db.query(
-      'UPDATE reservations SET status = "cancelled" WHERE id = ?',
+      "UPDATE reservations SET status = 'cancelled' WHERE id = ?",
       [rows[0].id],
     );
     res.json({ message: "Reservasi berhasil dibatalkan" });
