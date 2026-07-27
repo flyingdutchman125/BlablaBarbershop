@@ -100,51 +100,53 @@ export default function POSDashboard() {
     }
   };
 
+  const fetchServices = async () => {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/services`,
+      );
+      const colors = [
+        "bg-blue-900/40 border-blue-500",
+        "bg-green-900/40 border-green-500",
+        "bg-purple-900/40 border-purple-500",
+        "bg-pink-900/40 border-pink-500",
+        "bg-yellow-900/40 border-yellow-500",
+      ];
+
+      const servicesWithColors = res.data.map((service, index) => ({
+        ...service,
+        color: colors[index % colors.length],
+      }));
+      setAvailableServices(servicesWithColors);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/products`,
+      );
+      const colors = [
+        "bg-indigo-900/40 border-indigo-500",
+        "bg-teal-900/40 border-teal-500",
+        "bg-orange-900/40 border-orange-500",
+        "bg-cyan-900/40 border-cyan-500",
+      ];
+      const productsWithColors = res.data.map((product, index) => ({
+        ...product,
+        color: colors[index % colors.length],
+      }));
+      setAvailableProducts(productsWithColors);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+
   useEffect(() => {
     fetchActiveQueues();
     fetchTodayReservations();
-    const fetchServices = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/services`,
-        );
-        const colors = [
-          "bg-blue-900/40 border-blue-500",
-          "bg-green-900/40 border-green-500",
-          "bg-purple-900/40 border-purple-500",
-          "bg-pink-900/40 border-pink-500",
-          "bg-yellow-900/40 border-yellow-500",
-        ];
-
-        const servicesWithColors = res.data.map((service, index) => ({
-          ...service,
-          color: colors[index % colors.length],
-        }));
-        setAvailableServices(servicesWithColors);
-      } catch (error) {
-        console.error("Error fetching services:", error);
-      }
-    };
-    const fetchProducts = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/products`,
-        );
-        const colors = [
-          "bg-indigo-900/40 border-indigo-500",
-          "bg-teal-900/40 border-teal-500",
-          "bg-orange-900/40 border-orange-500",
-          "bg-cyan-900/40 border-cyan-500",
-        ];
-        const productsWithColors = res.data.map((product, index) => ({
-          ...product,
-          color: colors[index % colors.length],
-        }));
-        setAvailableProducts(productsWithColors);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      }
-    };
     fetchServices();
     fetchProducts();
   }, []);
@@ -426,6 +428,9 @@ export default function POSDashboard() {
         );
         fetchActiveQueues();
       }
+
+      // Refresh products to reflect new stock
+      fetchProducts();
 
       setReceiptData({
         items: [...cart],

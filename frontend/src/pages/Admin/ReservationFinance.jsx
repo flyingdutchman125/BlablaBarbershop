@@ -50,7 +50,7 @@ export default function ReservationFinance() {
 
   const totalRevenue = filteredReservations
     .filter((r) => r.status === "completed")
-    .reduce((sum, r) => sum + parseFloat(r.price), 0);
+    .reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0);
 
   const filteredExpenses = expenses.filter((e) => {
     const localDateStr = new Date(e.expense_date).toLocaleDateString("sv-SE"); // YYYY-MM-DD
