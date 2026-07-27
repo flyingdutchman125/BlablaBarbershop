@@ -15,6 +15,7 @@ import ServiceManagement from "./pages/Admin/ServiceManagement";
 import ReferralPromo from "./pages/Admin/ReferralPromo";
 import ReservationFinance from "./pages/Admin/ReservationFinance";
 import MemberManagement from "./pages/Admin/MemberManagement";
+import ProductManagement from "./pages/Admin/ProductManagement";
 
 function App() {
   const loginPath = import.meta.env.VITE_SECRET_LOGIN_PATH || "xL9pQ2m";
@@ -68,6 +69,10 @@ function App() {
             <Route
               path={`/${adminPath}/${membersPath}`}
               element={<MemberManagement />}
+            />
+            <Route
+              path={`/${adminPath}/products`}
+              element={<ProductManagement />}
             />
           </Route>
         </Routes>

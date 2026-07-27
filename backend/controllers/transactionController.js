@@ -50,12 +50,16 @@ exports.createTransaction = async (req, res) => {
         // Calculate earned points from items
         const itemsList = items || [];
         for (const item of itemsList) {
-          if (item.name && item.name.toLowerCase().includes("casual"))
+          if (item.type === "product") {
             newPoints += 5 * item.qty;
-          if (item.name && item.name.toLowerCase().includes("clean"))
-            newPoints += 10 * item.qty;
-          if (item.name && item.name.toLowerCase().includes("grooming"))
-            newPoints += 20 * item.qty;
+          } else {
+            if (item.name && item.name.toLowerCase().includes("casual"))
+              newPoints += 5 * item.qty;
+            if (item.name && item.name.toLowerCase().includes("clean"))
+              newPoints += 10 * item.qty;
+            if (item.name && item.name.toLowerCase().includes("grooming"))
+              newPoints += 20 * item.qty;
+          }
         }
 
         // Check birthday bonus
@@ -122,14 +126,14 @@ exports.createTransaction = async (req, res) => {
       );
       if (resRows.length > 0) {
         const sId = resRows[0].service_id;
-        const targetItem = itemsToCreate.find((i) => i.id === sId);
+        const targetItem = itemsToCreate.find((i) => i.id === sId && i.type !== "product");
         if (targetItem && targetItem.qty > 0) {
           targetItem.qty -= 1;
         }
       }
     }
 
-    // Insert walk-in reservations for the rest of the items
+    // Insert walk-in reservations for the rest of the items and deduct stock for products
     const todayDate = new Date();
     // Use local timezone offset trick for correct YYYY-MM-DD
     const today = new Date(
@@ -140,6 +144,10 @@ exports.createTransaction = async (req, res) => {
     const time = todayDate.toTimeString().split(" ")[0];
 
     for (const item of itemsToCreate) {
+      if (item.type === "product") {
+        await db.query("UPDATE products SET stock = GREATEST(stock - ?, 0) WHERE id = ?", [item.qty, item.id]);
+        continue; // Do not insert dummy reservations for products
+      }
       for (let i = 0; i < item.qty; i++) {
         // Skip dummy reservation if it's "Registrasi Member"
         if (item.name && item.name.includes("Registrasi Member")) continue;

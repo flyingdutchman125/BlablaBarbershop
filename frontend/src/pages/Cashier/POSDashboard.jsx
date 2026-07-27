@@ -22,10 +22,12 @@ export default function POSDashboard() {
   const [showScanner, setShowScanner] = useState(false);
   const [todayReservations, setTodayReservations] = useState([]);
   const [showReservationsDropdown, setShowReservationsDropdown] = useState(false);
+  const [availableProducts, setAvailableProducts] = useState([]);
 
   const [memberSearchInput, setMemberSearchInput] = useState("");
   const [activeMember, setActiveMember] = useState(null);
-  const [pointsToUse, setPointsToUse] = useState(0);
+  const [pointsToUseForService, setPointsToUseForService] = useState(0);
+  const [pointsToUseForProduct, setPointsToUseForProduct] = useState(0);
   const [showRegisterMember, setShowRegisterMember] = useState(false);
   const [registerForm, setRegisterForm] = useState({
     name: "",
@@ -123,7 +125,28 @@ export default function POSDashboard() {
         console.error("Error fetching services:", error);
       }
     };
+    const fetchProducts = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/products`,
+        );
+        const colors = [
+          "bg-indigo-900/40 border-indigo-500",
+          "bg-teal-900/40 border-teal-500",
+          "bg-orange-900/40 border-orange-500",
+          "bg-cyan-900/40 border-cyan-500",
+        ];
+        const productsWithColors = res.data.map((product, index) => ({
+          ...product,
+          color: colors[index % colors.length],
+        }));
+        setAvailableProducts(productsWithColors);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
     fetchServices();
+    fetchProducts();
   }, []);
 
   // Event listener untuk tombol '1' sebagai shortcut antrian walk-in
@@ -143,23 +166,24 @@ export default function POSDashboard() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const addToCart = (item) => {
+  const addToCart = (item, overrideType = null) => {
     setCart((prevCart) => {
-      const existingItem = prevCart.find((cartItem) => cartItem.id === item.id);
+      const type = overrideType || item.type || "service";
+      const existingItem = prevCart.find((cartItem) => cartItem.id === item.id && cartItem.type === type);
       if (existingItem) {
         return prevCart.map((cartItem) =>
-          cartItem.id === item.id
+          cartItem.id === item.id && cartItem.type === type
             ? { ...cartItem, qty: cartItem.qty + 1 }
             : cartItem,
         );
       } else {
-        return [...prevCart, { ...item, qty: 1 }];
+        return [...prevCart, { ...item, qty: 1, type }];
       }
     });
   };
 
-  const removeFromCart = (id) => {
-    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+  const removeFromCart = (id, type) => {
+    setCart((prevCart) => prevCart.filter((item) => !(item.id === id && item.type === type)));
   };
 
   const handleSearchMember = async (phoneOverride = null) => {
@@ -175,7 +199,8 @@ export default function POSDashboard() {
         },
       );
       setActiveMember(res.data);
-      setPointsToUse(0);
+      setPointsToUseForService(0);
+      setPointsToUseForProduct(0);
       setMemberSearchInput(phoneToSearch);
     } catch (error) {
       if (typeof phoneOverride !== "string") {
@@ -256,14 +281,14 @@ export default function POSDashboard() {
           (s) => s.id === reservation.service_id,
         );
         if (serviceToAdd) {
-          addToCart(serviceToAdd);
+          addToCart(serviceToAdd, 'service');
         } else {
           // Fallback if not found in state
           addToCart({
             id: reservation.service_id,
             name: reservation.service_name,
             price: parseFloat(reservation.price),
-          });
+          }, 'service');
         }
 
         setCurrentReservationId(reservation.id);
@@ -345,13 +370,27 @@ export default function POSDashboard() {
     };
   }, [showScanner]); // handleTicketValidation updates implicitly
 
-  const totalAmount = cart.reduce(
-    (total, item) => total + parseFloat(item.price) * item.qty,
-    0,
-  );
-  const discountPercentage = activeMember ? Math.min(pointsToUse || 0, 100) : 0;
-  const discountAmount = totalAmount * (discountPercentage / 100);
-  const amountAfterDiscount = totalAmount - discountAmount;
+  const serviceTotal = cart
+    .filter((item) => item.type !== "product")
+    .reduce((total, item) => total + parseFloat(item.price) * item.qty, 0);
+  const productTotal = cart
+    .filter((item) => item.type === "product")
+    .reduce((total, item) => total + parseFloat(item.price) * item.qty, 0);
+  const totalAmount = serviceTotal + productTotal;
+
+  const serviceDiscountPercentage = activeMember
+    ? Math.min(pointsToUseForService || 0, 100)
+    : 0;
+  const serviceDiscountAmount =
+    serviceTotal * (serviceDiscountPercentage / 100);
+
+  const productDiscountAmount = activeMember
+    ? (pointsToUseForProduct || 0) * 500
+    : 0;
+  const finalProductDiscount = Math.min(productDiscountAmount, productTotal);
+
+  const discountAmount = serviceDiscountAmount + finalProductDiscount;
+  const amountAfterDiscount = Math.max(0, totalAmount - discountAmount);
 
   const handleCheckout = async (paymentMethod) => {
     try {
@@ -365,7 +404,7 @@ export default function POSDashboard() {
         payment_method: paymentMethod,
         amount_paid: finalAmount, // Assuming exact amount paid for now
         member_phone: activeMember ? activeMember.phone : null,
-        points_used: pointsToUse ? parseInt(pointsToUse) : 0,
+        points_used: (pointsToUseForService ? parseInt(pointsToUseForService) : 0) + (pointsToUseForProduct ? parseInt(pointsToUseForProduct) : 0),
         queue_number: selectedQueue ? selectedQueue.queue_number : null,
       };
 
@@ -418,7 +457,8 @@ export default function POSDashboard() {
     setCurrentReservationId(null);
     setActiveMember(null);
     setMemberSearchInput("");
-    setPointsToUse(0);
+    setPointsToUseForService(0);
+    setPointsToUseForProduct(0);
     setSelectedQueue(null);
   };
 
@@ -552,19 +592,42 @@ export default function POSDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto pr-2 pb-20">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto pr-2 pb-6">
             {availableServices.map((service) => (
               <button
                 key={service.id}
-                onClick={() => addToCart(service)}
-                className={`${service.color} border-2 rounded-xl p-4 h-32 flex flex-col justify-between items-start hover:opacity-80 transition-opacity text-left`}
+                onClick={() => addToCart(service, 'service')}
+                className={`${service.color} border-2 rounded-xl p-4 h-32 flex flex-col justify-between items-start hover:opacity-80 transition-opacity text-left relative`}
               >
+                <span className="absolute top-2 right-2 bg-black/50 px-2 py-0.5 rounded text-[10px] font-bold text-gray-300">LAYANAN</span>
                 <span className="font-display font-bold text-lg leading-tight">
                   {service.name}
                 </span>
                 <span className="text-gray-300 font-medium tracking-wide">
                   Rp {parseFloat(service.price).toLocaleString("id-ID")}
                 </span>
+              </button>
+            ))}
+            
+            {availableProducts.map((product) => (
+              <button
+                key={`prod-${product.id}`}
+                onClick={() => addToCart(product, 'product')}
+                disabled={product.stock <= 0}
+                className={`${product.color} border-2 rounded-xl p-4 h-32 flex flex-col justify-between items-start hover:opacity-80 transition-opacity text-left relative ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <span className="absolute top-2 right-2 bg-black/50 px-2 py-0.5 rounded text-[10px] font-bold text-gray-300">PRODUK</span>
+                <span className="font-display font-bold text-lg leading-tight">
+                  {product.name}
+                </span>
+                <div className="flex flex-col">
+                  <span className="text-gray-300 font-medium tracking-wide">
+                    Rp {parseFloat(product.price).toLocaleString("id-ID")}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    Sisa Stok: {product.stock}
+                  </span>
+                </div>
               </button>
             ))}
           </div>
@@ -601,14 +664,14 @@ export default function POSDashboard() {
                   className="flex justify-between items-center bg-barber-black p-3 rounded-lg border border-gray-800"
                 >
                   <div className="flex-1">
-                    <h4 className="font-medium text-sm">{item.name}</h4>
+                    <h4 className="font-medium text-sm">{item.name} {item.type === 'product' && <span className="text-[10px] bg-gray-700 px-1 rounded ml-1">Produk</span>}</h4>
                     <p className="text-barber-gold text-xs">
                       Rp {parseFloat(item.price).toLocaleString("id-ID")} x{" "}
                       {item.qty}
                     </p>
                   </div>
                   <button
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => removeFromCart(item.id, item.type)}
                     className="text-gray-500 hover:text-red-500 transition-colors p-2 print:hidden"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -651,25 +714,49 @@ export default function POSDashboard() {
                     </span>
                   </p>
 
-                  <div className="mt-2 flex items-center space-x-2">
-                    <input
-                      type="number"
-                      min="0"
-                      max={activeMember.points}
-                      className="w-20 bg-barber-black border border-gray-700 text-white px-2 py-1 rounded text-sm focus:outline-none"
-                      placeholder="Poin"
-                      value={pointsToUse}
-                      onChange={(e) => {
-                        let val = parseInt(e.target.value) || 0;
-                        if (val > activeMember.points)
-                          val = activeMember.points;
-                        if (val > 100) val = 100; // max 100% discount
-                        setPointsToUse(val);
-                      }}
-                    />
-                    <span className="text-xs text-gray-400">
-                      Gunakan Poin (1% / Poin)
-                    </span>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max={activeMember.points - pointsToUseForProduct}
+                        className="w-20 bg-barber-black border border-gray-700 text-white px-2 py-1 rounded text-sm focus:outline-none focus:border-barber-gold"
+                        placeholder="Poin"
+                        value={pointsToUseForService}
+                        onChange={(e) => {
+                          let val = parseInt(e.target.value) || 0;
+                          let maxPointsForService = activeMember.points - pointsToUseForProduct;
+                          if (val > maxPointsForService) val = maxPointsForService;
+                          if (val > 100) val = 100; // max 100% discount
+                          setPointsToUseForService(val);
+                        }}
+                      />
+                      <span className="text-xs text-gray-400">
+                        Diskon Layanan (1% / Poin)
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max={activeMember.points - pointsToUseForService}
+                        className="w-20 bg-barber-black border border-gray-700 text-white px-2 py-1 rounded text-sm focus:outline-none focus:border-barber-gold"
+                        placeholder="Poin"
+                        value={pointsToUseForProduct}
+                        onChange={(e) => {
+                          let val = parseInt(e.target.value) || 0;
+                          let maxPointsForProduct = activeMember.points - pointsToUseForService;
+                          if (val > maxPointsForProduct) val = maxPointsForProduct;
+                          // Max discount shouldn't exceed product total
+                          let maxAllowedDiscount = productTotal / 500;
+                          if (val > maxAllowedDiscount) val = Math.ceil(maxAllowedDiscount);
+                          setPointsToUseForProduct(val);
+                        }}
+                      />
+                      <span className="text-xs text-gray-400">
+                        Diskon Produk (Rp 500 / Poin)
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -681,10 +768,16 @@ export default function POSDashboard() {
               <span>Subtotal</span>
               <span>Rp {totalAmount.toLocaleString("id-ID")}</span>
             </div>
-            {discountAmount > 0 && (
+            {serviceDiscountAmount > 0 && (
+              <div className="flex justify-between text-green-400 mb-1 text-sm">
+                <span>Diskon Layanan ({serviceDiscountPercentage}%)</span>
+                <span>- Rp {serviceDiscountAmount.toLocaleString("id-ID")}</span>
+              </div>
+            )}
+            {finalProductDiscount > 0 && (
               <div className="flex justify-between text-green-400 mb-2 text-sm">
-                <span>Diskon Poin ({discountPercentage}%)</span>
-                <span>- Rp {discountAmount.toLocaleString("id-ID")}</span>
+                <span>Diskon Produk</span>
+                <span>- Rp {finalProductDiscount.toLocaleString("id-ID")}</span>
               </div>
             )}
             <div className="flex justify-between font-display font-bold text-2xl text-white mb-6 border-t border-gray-700 pt-4">

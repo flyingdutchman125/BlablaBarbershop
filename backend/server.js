@@ -38,10 +38,26 @@ db.query(
     expense_date DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
-`,
+`
 )
   .then(() => console.log("expenses table is ready"))
   .catch((err) => console.error("Error creating expenses table:", err));
+
+// Initialize Products table
+db.query(
+  `
+  CREATE TABLE IF NOT EXISTS products (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    stock INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+`
+)
+  .then(() => console.log("products table is ready"))
+  .catch((err) => console.error("Error creating products table:", err));
+
 
 // Import cache middleware
 const {
@@ -65,6 +81,7 @@ const transactionRoutes = require("./routes/transactionRoutes");
 const memberRoutes = require("./routes/memberRoutes");
 const queueRoutes = require("./routes/queueRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
+const productRoutes = require("./routes/productRoutes");
 
 app.use("/api/services", serviceRoutes);
 app.use("/api/kapsters", kapsterRoutes);
@@ -75,6 +92,7 @@ app.use("/api/transactions", transactionRoutes);
 app.use("/api/members", memberRoutes);
 app.use("/api/queues", queueRoutes);
 app.use("/api/expenses", expenseRoutes);
+app.use("/api/products", productRoutes);
 
 // Simple root route
 app.get("/", (req, res) => {

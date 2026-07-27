@@ -10,6 +10,7 @@ import {
   Box,
   FileText,
   Gift,
+  ShoppingBag,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import logoImg from "/src/BLABLA_BAREBER.png";
@@ -78,6 +79,12 @@ export default function AdminLayout({ children }) {
             className={getLinkClass(`/${adminPath}/${membersPath}`)}
           >
             <Users className="w-5 h-5 mr-3" /> Members
+          </Link>
+          <Link
+            to={`/${adminPath}/products`}
+            className={getLinkClass(`/${adminPath}/products`)}
+          >
+            <ShoppingBag className="w-5 h-5 mr-3" /> Produk
           </Link>
           <Link
             to={`/${adminPath}/${reservationsPath}`}
