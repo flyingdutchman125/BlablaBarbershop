@@ -50,9 +50,7 @@ exports.createTransaction = async (req, res) => {
         // Calculate earned points from items
         const itemsList = items || [];
         for (const item of itemsList) {
-          if (item.type === "product") {
-            newPoints += 5 * item.qty;
-          } else {
+          if (item.type !== "product") {
             if (item.name && item.name.toLowerCase().includes("casual"))
               newPoints += 5 * item.qty;
             if (item.name && item.name.toLowerCase().includes("clean"))

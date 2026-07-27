@@ -387,7 +387,7 @@ export default function POSDashboard() {
     serviceTotal * (serviceDiscountPercentage / 100);
 
   const productDiscountAmount = activeMember
-    ? (pointsToUseForProduct || 0) * 500
+    ? (pointsToUseForProduct || 0) * 100
     : 0;
   const finalProductDiscount = Math.min(productDiscountAmount, productTotal);
 
@@ -432,8 +432,36 @@ export default function POSDashboard() {
       // Refresh products to reflect new stock
       fetchProducts();
 
+      // Calculate per-item details for the receipt
+      const receiptItems = cart.map(item => {
+        const itemNormalTotal = parseFloat(item.price) * item.qty;
+        let itemDiscount = 0;
+        let itemDiscountText = "-";
+        
+        if (item.type === "product") {
+           if (productTotal > 0 && finalProductDiscount > 0) {
+             itemDiscount = (itemNormalTotal / productTotal) * finalProductDiscount;
+             const pointsForThisItem = itemDiscount / 100;
+             itemDiscountText = `${Math.round(pointsForThisItem)} Poin`;
+           }
+        } else {
+           if (serviceDiscountPercentage > 0) {
+             itemDiscount = itemNormalTotal * (serviceDiscountPercentage / 100);
+             itemDiscountText = `${serviceDiscountPercentage}% / ${serviceDiscountPercentage} Poin`;
+           }
+        }
+        
+        return {
+          ...item,
+          normalTotal: itemNormalTotal,
+          discountAmount: itemDiscount,
+          discountText: itemDiscountText,
+          finalTotal: itemNormalTotal - itemDiscount
+        };
+      });
+
       setReceiptData({
-        items: [...cart],
+        items: receiptItems,
         subtotal: totalAmount,
         discount: discountAmount,
         tax: 0,
@@ -753,13 +781,13 @@ export default function POSDashboard() {
                           let maxPointsForProduct = activeMember.points - pointsToUseForService;
                           if (val > maxPointsForProduct) val = maxPointsForProduct;
                           // Max discount shouldn't exceed product total
-                          let maxAllowedDiscount = productTotal / 500;
+                          let maxAllowedDiscount = productTotal / 100;
                           if (val > maxAllowedDiscount) val = Math.ceil(maxAllowedDiscount);
                           setPointsToUseForProduct(val);
                         }}
                       />
                       <span className="text-xs text-gray-400">
-                        Diskon Produk (Rp 500 / Poin)
+                        Diskon Produk (Rp 100 / Poin)
                       </span>
                     </div>
                   </div>
@@ -861,22 +889,25 @@ export default function POSDashboard() {
                 <p>Met : {receiptData.method.toUpperCase()}</p>
               </div>
 
-              <div className="text-left text-xs print:text-[11px] mb-4 print:mb-3 border-b border-dashed border-gray-400 pb-4 print:pb-3">
+              <div className="text-left text-xs print:text-[11px] mb-4 print:mb-3 border-b border-dashed border-gray-400 pb-2 print:pb-1">
                 {receiptData.items.map((item, idx) => (
-                  <div key={idx} className="mb-2 print:mb-1">
-                    <p className="font-bold print:font-semibold truncate">
-                      {item.name}
+                  <div key={idx} className="mb-3 print:mb-2 border-b border-gray-100 print:border-gray-300 pb-2 print:pb-1 last:border-0">
+                    <p className="font-bold print:font-semibold">
+                      {item.name} <span className="font-normal text-gray-500">({item.qty}x)</span>
                     </p>
-                    <div className="flex justify-between">
-                      <span>
-                        {item.qty}x
-                        {parseFloat(item.price).toLocaleString("id-ID")}
-                      </span>
-                      <span>
-                        {(item.qty * parseFloat(item.price)).toLocaleString(
-                          "id-ID",
-                        )}
-                      </span>
+                    <div className="flex justify-between mt-1">
+                      <span>Harga Normal</span>
+                      <span>{item.normalTotal.toLocaleString("id-ID")}</span>
+                    </div>
+                    {item.discountAmount > 0 && (
+                      <div className="flex justify-between text-gray-600 print:text-gray-800">
+                        <span>Disc ({item.discountText})</span>
+                        <span>-{Math.round(item.discountAmount).toLocaleString("id-ID")}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-semibold mt-1">
+                      <span>Total Item</span>
+                      <span>{Math.round(item.finalTotal).toLocaleString("id-ID")}</span>
                     </div>
                   </div>
                 ))}
