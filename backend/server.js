@@ -55,8 +55,17 @@ db.query(
   )
 `
 )
-  .then(() => console.log("products table is ready"))
-  .catch((err) => console.error("Error creating products table:", err));
+  .then(() => {
+    console.log("products table is ready");
+    // Also ensure reservations has product_id column
+    return db.query("ALTER TABLE reservations ADD COLUMN product_id INT NULL DEFAULT NULL");
+  })
+  .then(() => console.log("Added product_id to reservations"))
+  .catch((err) => {
+    if (err.code !== 'ER_DUP_FIELDNAME') {
+      console.error("Error creating products table or altering reservations:", err);
+    }
+  });
 
 
 // Import cache middleware

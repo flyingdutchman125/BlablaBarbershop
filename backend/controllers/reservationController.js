@@ -11,13 +11,15 @@ exports.getAllReservations = async (req, res) => {
           ELSE '-' 
         END) as phone, 
         COALESCE(k.name, '-') as kapster_name, 
-        s.name as service_name, 
-        s.price,
-        t.created_at as transaction_date
+        COALESCE(s.name, p.name) as service_name, 
+        COALESCE(s.price, p.price) as price,
+        t.created_at as transaction_date,
+        CASE WHEN r.product_id IS NOT NULL THEN 'product' ELSE 'service' END as item_type
       FROM reservations r
       LEFT JOIN users u ON r.customer_id = u.id
       LEFT JOIN kapsters k ON r.kapster_id = k.id
       LEFT JOIN services s ON r.service_id = s.id
+      LEFT JOIN products p ON r.product_id = p.id
       LEFT JOIN transactions t ON t.reservation_id = r.id
       ORDER BY r.created_at DESC
     `);
@@ -39,13 +41,15 @@ exports.getTodayReservations = async (req, res) => {
           ELSE '-' 
         END) as phone, 
         COALESCE(k.name, '-') as kapster_name, 
-        s.name as service_name, 
-        s.price,
-        t.created_at as transaction_date
+        COALESCE(s.name, p.name) as service_name, 
+        COALESCE(s.price, p.price) as price,
+        t.created_at as transaction_date,
+        CASE WHEN r.product_id IS NOT NULL THEN 'product' ELSE 'service' END as item_type
       FROM reservations r
       LEFT JOIN users u ON r.customer_id = u.id
       LEFT JOIN kapsters k ON r.kapster_id = k.id
       LEFT JOIN services s ON r.service_id = s.id
+      LEFT JOIN products p ON r.product_id = p.id
       LEFT JOIN transactions t ON t.reservation_id = r.id
       WHERE r.booking_date = ?
       ORDER BY r.booking_time ASC

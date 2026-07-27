@@ -144,10 +144,12 @@ exports.createTransaction = async (req, res) => {
     const time = todayDate.toTimeString().split(" ")[0];
 
     for (const item of itemsToCreate) {
-      if (item.type === "product") {
+      let isProduct = item.type === "product";
+
+      if (isProduct) {
         await db.query("UPDATE products SET stock = GREATEST(stock - ?, 0) WHERE id = ?", [item.qty, item.id]);
-        continue; // Do not insert dummy reservations for products
       }
+
       for (let i = 0; i < item.qty; i++) {
         // Skip dummy reservation if it's "Registrasi Member"
         if (item.name && item.name.includes("Registrasi Member")) continue;
@@ -162,10 +164,17 @@ exports.createTransaction = async (req, res) => {
             crypto.randomBytes(2).toString("hex").toUpperCase();
         }
 
-        await db.query(
-          "INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, booking_date, booking_time, status) VALUES (?, NULL, NULL, ?, ?, ?, 'completed')",
-          [ticket_code, item.id, today, time],
-        );
+        if (isProduct) {
+          await db.query(
+            "INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, product_id, booking_date, booking_time, status) VALUES (?, NULL, NULL, NULL, ?, ?, ?, 'completed')",
+            [ticket_code, item.id, today, time],
+          );
+        } else {
+          await db.query(
+            "INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, product_id, booking_date, booking_time, status) VALUES (?, NULL, NULL, ?, NULL, ?, ?, 'completed')",
+            [ticket_code, item.id, today, time],
+          );
+        }
       }
     }
 
