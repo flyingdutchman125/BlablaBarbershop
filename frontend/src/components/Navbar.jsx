@@ -15,6 +15,7 @@ export default function Navbar() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [phone, setPhone] = useState("");
   const [history, setHistory] = useState([]);
+  const [memberData, setMemberData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const navigate = useNavigate();
@@ -24,11 +25,20 @@ export default function Navbar() {
     if (!phone) return;
     setLoading(true);
     setSearched(true);
+    setMemberData(null);
     try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations/phone/${phone}`,
-      );
-      setHistory(res.data);
+      const [resHistory, resMember] = await Promise.allSettled([
+        axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations/phone/${phone}`),
+        axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/members/${phone}`)
+      ]);
+      if (resHistory.status === "fulfilled") {
+        setHistory(resHistory.value.data);
+      } else {
+        setHistory([]);
+      }
+      if (resMember.status === "fulfilled") {
+        setMemberData(resMember.value.data);
+      }
     } catch (error) {
       console.error(error);
       setHistory([]);
@@ -47,6 +57,7 @@ export default function Navbar() {
     // Optional: reset search when closing
     // setPhone('');
     // setHistory([]);
+    // setMemberData(null);
     // setSearched(false);
   };
 
@@ -97,7 +108,7 @@ export default function Navbar() {
                 <div className="flex items-center">
                   <ShoppingBag className="w-5 h-5 text-barber-gold mr-3" />
                   <h2 className="text-xl font-display font-bold text-white">
-                    Riwayat Booking
+                    Pencarian & Riwayat
                   </h2>
                 </div>
                 <button
@@ -137,6 +148,17 @@ export default function Navbar() {
                 {loading && (
                   <div className="flex justify-center py-8">
                     <div className="w-8 h-8 border-4 border-barber-gold border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+
+                {!loading && searched && memberData && (
+                  <div className="mb-6 bg-barber-black/50 p-4 rounded-xl border border-barber-gold/30">
+                    <div className="text-gray-400 text-xs mb-1">Status Member</div>
+                    <div className="text-lg font-bold text-white mb-2">{memberData.name}</div>
+                    <div className="flex items-center justify-between bg-barber-black p-3 rounded-lg border border-gray-800">
+                      <span className="text-sm text-gray-400">Total Poin Loyalitas</span>
+                      <span className="text-2xl font-display font-bold text-barber-gold">{memberData.points || 0}</span>
+                    </div>
                   </div>
                 )}
 

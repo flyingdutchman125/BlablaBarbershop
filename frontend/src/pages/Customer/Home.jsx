@@ -10,33 +10,6 @@ import axios from "axios";
 export default function Home() {
   const [services, setServices] = React.useState([]);
   const [kapsters, setKapsters] = React.useState([]);
-  const [memberSearchInput, setMemberSearchInput] = React.useState("");
-  const [memberData, setMemberData] = React.useState(null);
-  const [isSearchingMember, setIsSearchingMember] = React.useState(false);
-  const [memberSearchError, setMemberSearchError] = React.useState("");
-
-  const handleSearchMember = async (e) => {
-    e.preventDefault();
-    if (!memberSearchInput || !memberSearchInput.trim()) return;
-    setIsSearchingMember(true);
-    setMemberSearchError("");
-    setMemberData(null);
-    try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/members/${memberSearchInput}`
-      );
-      setMemberData(res.data);
-    } catch (error) {
-      console.error("Error fetching member:", error);
-      if (error.response && error.response.status === 404) {
-        setMemberSearchError("Nomor HP tidak terdaftar sebagai member.");
-      } else {
-        setMemberSearchError("Terjadi kesalahan. Silakan coba lagi.");
-      }
-    } finally {
-      setIsSearchingMember(false);
-    }
-  };
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -277,63 +250,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Check Member Points Section */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="bg-barber-darkgray/80 backdrop-blur-sm p-8 md:p-10 rounded-3xl border border-barber-gold/30 shadow-[0_0_30px_rgba(212,175,55,0.1)] text-center relative overflow-hidden">
-          <div className="absolute -top-24 -right-24 w-48 h-48 bg-barber-gold/10 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-barber-gold/10 rounded-full blur-3xl"></div>
-          
-          <h2 className="text-3xl font-display font-bold mb-4 relative z-10">
-            Cek Poin <span className="text-barber-gold">Member</span>
-          </h2>
-          <p className="text-gray-400 mb-8 max-w-lg mx-auto relative z-10">
-            Masukkan nomor handphone Anda yang terdaftar untuk melihat total poin loyalitas yang Anda miliki saat ini.
-          </p>
-
-          <form onSubmit={handleSearchMember} className="max-w-md mx-auto relative z-10">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="text"
-                placeholder="Contoh: 08123456789"
-                className="flex-1 bg-barber-black border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-barber-gold transition-colors text-center sm:text-left"
-                value={memberSearchInput}
-                onChange={(e) => setMemberSearchInput(e.target.value)}
-              />
-              <button
-                type="submit"
-                disabled={isSearchingMember}
-                className="bg-barber-gold text-barber-black px-6 py-3 rounded-xl font-bold hover:bg-barber-gold-light transition-colors disabled:opacity-50"
-              >
-                {isSearchingMember ? "Mencari..." : "Cek Poin"}
-              </button>
-            </div>
-            
-            {memberSearchError && (
-              <div className="mt-4 text-red-400 text-sm bg-red-400/10 py-2 px-4 rounded-lg">
-                {memberSearchError}
-              </div>
-            )}
-            
-            {memberData && (
-              <div className="mt-6 bg-barber-black/50 p-6 rounded-2xl border border-gray-700 transform transition-all animate-fadeIn">
-                <div className="text-gray-400 text-sm mb-1">Halo, Member Setia</div>
-                <div className="text-2xl font-bold text-white mb-4">{memberData.name}</div>
-                <div className="grid grid-cols-2 gap-4 divide-x divide-gray-700 bg-barber-black/50 p-4 rounded-xl">
-                  <div>
-                    <div className="text-xs text-gray-500 mb-1">Status Member</div>
-                    <div className="text-barber-gold font-bold">Aktif</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-gray-500 mb-1">Total Poin</div>
-                    <div className="text-3xl font-display font-bold text-barber-gold">{memberData.points || 0}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </form>
         </div>
       </div>
 
