@@ -4,7 +4,7 @@ exports.getAllKapsters = async (req, res) => {
   try {
     let query = "SELECT * FROM kapsters";
     if (req.query.all !== "true") {
-      query += ' WHERE status = "active"';
+      query += " WHERE status = 'active'";
     }
     const [rows] = await db.query(query);
     res.json(rows);
