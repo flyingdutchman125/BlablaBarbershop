@@ -22,7 +22,7 @@ exports.createQueue = async (req, res) => {
     }
 
     const [result] = await db.query(
-      'INSERT INTO walkin_queues (queue_number, queue_date, status) VALUES (?, ?, "waiting")',
+      "INSERT INTO walkin_queues (queue_number, queue_date, status) VALUES (?, ?, 'waiting')",
       [nextQueueNumber, today],
     );
 
@@ -46,7 +46,7 @@ exports.getActiveQueues = async (req, res) => {
       .toISOString()
       .split("T")[0];
     const [rows] = await db.query(
-      'SELECT * FROM walkin_queues WHERE queue_date = ? AND status = "waiting" ORDER BY queue_number ASC',
+      "SELECT * FROM walkin_queues WHERE queue_date = ? AND status = 'waiting' ORDER BY queue_number ASC",
       [today],
     );
     res.json(rows);
@@ -60,7 +60,7 @@ exports.completeQueue = async (req, res) => {
   try {
     const { id } = req.params;
     const [result] = await db.query(
-      'UPDATE walkin_queues SET status = "completed" WHERE id = ?',
+      "UPDATE walkin_queues SET status = 'completed' WHERE id = ?",
       [id],
     );
 

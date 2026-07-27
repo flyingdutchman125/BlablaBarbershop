@@ -106,7 +106,7 @@ exports.createTransaction = async (req, res) => {
 
     if (reservation_id) {
       await db.query(
-        'UPDATE reservations SET status = "completed" WHERE id = ?',
+        "UPDATE reservations SET status = 'completed' WHERE id = ?",
         [reservation_id],
       );
     }
@@ -155,7 +155,7 @@ exports.createTransaction = async (req, res) => {
         }
 
         await db.query(
-          'INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, booking_date, booking_time, status) VALUES (?, NULL, NULL, ?, ?, ?, "completed")',
+          "INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, booking_date, booking_time, status) VALUES (?, NULL, NULL, ?, ?, ?, 'completed')",
           [ticket_code, item.id, today, time],
         );
       }
