@@ -20,6 +20,8 @@ export default function POSDashboard() {
   const [showReceipt, setShowReceipt] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
   const [showScanner, setShowScanner] = useState(false);
+  const [todayReservations, setTodayReservations] = useState([]);
+  const [showReservationsDropdown, setShowReservationsDropdown] = useState(false);
 
   const [memberSearchInput, setMemberSearchInput] = useState("");
   const [activeMember, setActiveMember] = useState(null);
@@ -48,6 +50,19 @@ export default function POSDashboard() {
       setActiveQueues(res.data);
     } catch (error) {
       console.error("Error fetching queues:", error);
+    }
+  };
+
+  const fetchTodayReservations = async () => {
+    try {
+      const token = localStorage.getItem("barbershop_token");
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations/today`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setTodayReservations(res.data);
+    } catch (error) {
+      console.error("Error fetching today reservations:", error);
     }
   };
 
@@ -85,6 +100,7 @@ export default function POSDashboard() {
 
   useEffect(() => {
     fetchActiveQueues();
+    fetchTodayReservations();
     const fetchServices = async () => {
       try {
         const res = await axios.get(
@@ -225,29 +241,16 @@ export default function POSDashboard() {
 
       const token = localStorage.getItem("barbershop_token");
 
-      if (reservation.status === "pending") {
-        // Update status to checked_in
-        await axios.patch(
-          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations/${reservation.id}/status`,
-          { status: "checked_in" },
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        setTicketInput("");
-        Swal.fire({
-          title: "Sukses",
-          text: "Tiket berhasil di validasi. Pelanggan Check-in untuk potong rambut!",
-          icon: "success",
-          confirmButtonColor: "#d4af37",
-        });
-
-        if (
-          reservation.customer_phone &&
-          reservation.customer_phone !== "-" &&
-          !reservation.customer_phone.startsWith("Antrian")
-        ) {
-          handleSearchMember(reservation.customer_phone);
+      if (reservation.status === "pending" || reservation.status === "checked_in") {
+        if (reservation.status === "pending") {
+          // Update status to checked_in
+          await axios.patch(
+            `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations/${reservation.id}/status`,
+            { status: "checked_in" },
+            { headers: { Authorization: `Bearer ${token}` } },
+          );
         }
-      } else if (reservation.status === "checked_in") {
+        
         // Auto add reserved service to cart for payment
         const serviceToAdd = availableServices.find(
           (s) => s.id === reservation.service_id,
@@ -265,10 +268,13 @@ export default function POSDashboard() {
 
         setCurrentReservationId(reservation.id);
         setTicketInput("");
+        setShowReservationsDropdown(false);
+        fetchTodayReservations(); // Refresh list
+
         Swal.fire({
-          title: "Info",
-          text: "Data pesanan dimuat. Silakan proses pembayaran.",
-          icon: "info",
+          title: "Sukses",
+          text: "Pelanggan di Check-in dan item ditambahkan ke keranjang!",
+          icon: "success",
           confirmButtonColor: "#d4af37",
         });
 
@@ -438,15 +444,49 @@ export default function POSDashboard() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Validasi Tiket Reservasi..."
-                  className="bg-barber-darkgray border border-gray-700 text-white px-4 py-2 pl-10 rounded-lg focus:outline-none focus:border-barber-gold w-64"
+                  placeholder="Validasi Tiket / Nama Pelanggan..."
+                  className="bg-barber-darkgray border border-gray-700 text-white px-4 py-2 pl-10 rounded-lg focus:outline-none focus:border-barber-gold w-72 relative z-10"
                   value={ticketInput}
                   onChange={(e) => setTicketInput(e.target.value)}
+                  onFocus={() => setShowReservationsDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowReservationsDropdown(false), 200)}
                   onKeyDown={(e) =>
                     e.key === "Enter" && handleTicketValidation()
                   }
                 />
-                <QrCode className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+                <QrCode className="absolute left-3 top-2.5 w-5 h-5 text-gray-400 z-10" />
+
+                {/* Dropdown hari ini */}
+                {showReservationsDropdown && (
+                  <div className="absolute z-50 w-full mt-1 bg-barber-darkgray border border-gray-700 rounded-lg shadow-2xl max-h-60 overflow-y-auto">
+                    {todayReservations
+                      .filter(r => 
+                         (r.status === 'pending' || r.status === 'checked_in') &&
+                         (r.customer_name.toLowerCase().includes(ticketInput.toLowerCase()) || 
+                          r.ticket_code.toLowerCase().includes(ticketInput.toLowerCase()))
+                       )
+                      .map((res) => (
+                      <div 
+                        key={res.id}
+                        className="p-3 border-b border-gray-800 hover:bg-gray-800 cursor-pointer flex justify-between items-center transition-colors"
+                        onClick={() => {
+                          setTicketInput(res.ticket_code);
+                          // Using setTimeout to allow state update before validating
+                          setTimeout(() => handleTicketValidation(res.ticket_code), 50);
+                        }}
+                      >
+                        <div>
+                          <div className="font-bold text-white text-sm">{res.customer_name}</div>
+                          <div className="text-xs text-gray-400">{res.service_name} • {res.booking_time}</div>
+                        </div>
+                        <div className="text-xs font-mono text-barber-gold">{res.ticket_code}</div>
+                      </div>
+                    ))}
+                    {todayReservations.filter(r => (r.status === 'pending' || r.status === 'checked_in')).length === 0 && (
+                      <div className="p-4 text-center text-gray-500 text-sm">Tidak ada reservasi hari ini</div>
+                    )}
+                  </div>
+                )}
               </div>
               <button
                 onClick={() => setShowScanner(true)}
@@ -456,7 +496,7 @@ export default function POSDashboard() {
                 <Camera className="w-5 h-5" />
               </button>
               <button
-                onClick={handleTicketValidation}
+                onClick={() => handleTicketValidation()}
                 className="bg-barber-gold text-black px-4 py-2 rounded-lg font-bold hover:bg-barber-gold-light"
               >
                 Proses Tiket

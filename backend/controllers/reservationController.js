@@ -28,6 +28,35 @@ exports.getAllReservations = async (req, res) => {
   }
 };
 
+exports.getTodayReservations = async (req, res) => {
+  try {
+    const today = new Date().toISOString().split("T")[0]; // format YYYY-MM-DD
+    const [rows] = await db.query(`
+      SELECT r.*, 
+        COALESCE(u.name, 'Walk-in Customer') as customer_name, 
+        COALESCE(u.phone, CASE 
+          WHEN r.ticket_code LIKE 'WLK-%-%' THEN CONCAT('Antrian ', SUBSTRING_INDEX(SUBSTRING_INDEX(r.ticket_code, '-', 2), '-', -1))
+          ELSE '-' 
+        END) as phone, 
+        COALESCE(k.name, '-') as kapster_name, 
+        s.name as service_name, 
+        s.price,
+        t.created_at as transaction_date
+      FROM reservations r
+      LEFT JOIN users u ON r.customer_id = u.id
+      LEFT JOIN kapsters k ON r.kapster_id = k.id
+      LEFT JOIN services s ON r.service_id = s.id
+      LEFT JOIN transactions t ON t.reservation_id = r.id
+      WHERE r.booking_date = ?
+      ORDER BY r.booking_time ASC
+    `, [today]);
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 exports.createReservation = async (req, res) => {
   try {
     const {

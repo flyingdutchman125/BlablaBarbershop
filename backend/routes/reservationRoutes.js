@@ -11,6 +11,7 @@ router.get(
 );
 router.post("/", reservationController.createReservation);
 router.get("/booked-times", reservationController.getBookedTimes);
+router.get("/today", verifyToken, requireRole(["admin", "cashier"]), reservationController.getTodayReservations);
 router.get(
   "/ticket/:ticket_code",
   reservationController.getReservationByTicket,
