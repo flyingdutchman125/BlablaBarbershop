@@ -22,7 +22,7 @@ export default function ServiceManagement() {
   const fetchServices = async () => {
     try {
       const response = await axios.get(
-        `http://${window.location.hostname}:5000/api/services`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/services`,
       );
       setServices(response.data);
     } catch (error) {
@@ -104,13 +104,13 @@ export default function ServiceManagement() {
     try {
       if (formData.id) {
         await axios.put(
-          `http://${window.location.hostname}:5000/api/services/${formData.id}`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/services/${formData.id}`,
           submitData,
           { headers },
         );
       } else {
         await axios.post(
-          `http://${window.location.hostname}:5000/api/services`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/services`,
           submitData,
           { headers },
         );
@@ -152,7 +152,7 @@ export default function ServiceManagement() {
       const token = localStorage.getItem("barbershop_token");
       try {
         await axios.delete(
-          `http://${window.location.hostname}:5000/api/services/${id}`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/services/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -236,7 +236,7 @@ export default function ServiceManagement() {
                             src={
                               service.image_url.startsWith("http")
                                 ? service.image_url
-                                : `http://${window.location.hostname}:5000${service.image_url}`
+                                : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${service.image_url}`
                             }
                             alt={service.name}
                             className="w-16 h-12 rounded-lg object-cover border border-gray-700"
@@ -380,7 +380,7 @@ export default function ServiceManagement() {
                           />
                         ) : (
                           <img
-                            src={`http://${window.location.hostname}:5000${imagePreview}`}
+                            src={`${import.meta.env.VITE_API_URL || "http://localhost:5000"}${imagePreview}`}
                             alt="Preview"
                             className="w-full h-full object-cover"
                           />

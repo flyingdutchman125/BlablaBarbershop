@@ -13,7 +13,7 @@ export default function ReferralPromo() {
       try {
         const token = localStorage.getItem("barbershop_token");
         const response = await axios.get(
-          `http://${window.location.hostname}:5000/api/customers`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/customers`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },

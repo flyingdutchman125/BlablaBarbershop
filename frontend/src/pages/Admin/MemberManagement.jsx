@@ -17,7 +17,7 @@ export default function MemberManagement() {
     try {
       const token = localStorage.getItem("barbershop_token");
       const response = await axios.get(
-        `http://${window.location.hostname}:5000/api/members`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/members`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -52,7 +52,7 @@ export default function MemberManagement() {
       try {
         const token = localStorage.getItem("barbershop_token");
         await axios.delete(
-          `http://${window.location.hostname}:5000/api/members/${id}`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/members/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },

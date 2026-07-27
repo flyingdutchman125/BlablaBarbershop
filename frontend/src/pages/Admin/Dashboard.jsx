@@ -22,7 +22,7 @@ export default function Dashboard() {
       try {
         const token = localStorage.getItem("barbershop_token");
         const res = await axios.get(
-          `http://${window.location.hostname}:5000/api/reservations`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },

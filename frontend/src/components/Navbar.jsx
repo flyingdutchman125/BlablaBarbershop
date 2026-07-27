@@ -26,7 +26,7 @@ export default function Navbar() {
     setSearched(true);
     try {
       const res = await axios.get(
-        `http://${window.location.hostname}:5000/api/reservations/phone/${phone}`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations/phone/${phone}`,
       );
       setHistory(res.data);
     } catch (error) {

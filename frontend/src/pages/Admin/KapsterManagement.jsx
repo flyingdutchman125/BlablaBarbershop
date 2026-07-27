@@ -21,7 +21,7 @@ export default function KapsterManagement() {
   const fetchKapsters = async () => {
     try {
       const response = await axios.get(
-        `http://${window.location.hostname}:5000/api/kapsters?all=true`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/kapsters?all=true`,
       );
       setKapsters(response.data);
     } catch (error) {
@@ -100,13 +100,13 @@ export default function KapsterManagement() {
     try {
       if (formData.id) {
         await axios.put(
-          `http://${window.location.hostname}:5000/api/kapsters/${formData.id}`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/kapsters/${formData.id}`,
           submitData,
           { headers },
         );
       } else {
         await axios.post(
-          `http://${window.location.hostname}:5000/api/kapsters`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/kapsters`,
           submitData,
           { headers },
         );
@@ -148,7 +148,7 @@ export default function KapsterManagement() {
       const token = localStorage.getItem("barbershop_token");
       try {
         await axios.delete(
-          `http://${window.location.hostname}:5000/api/kapsters/${id}`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/kapsters/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -224,7 +224,7 @@ export default function KapsterManagement() {
                             src={
                               kapster.photo_url.startsWith("http")
                                 ? kapster.photo_url
-                                : `http://${window.location.hostname}:5000${kapster.photo_url}`
+                                : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${kapster.photo_url}`
                             }
                             alt={kapster.name}
                             className="w-12 h-12 rounded-full object-cover border border-gray-700"
@@ -341,7 +341,7 @@ export default function KapsterManagement() {
                           />
                         ) : (
                           <img
-                            src={`http://${window.location.hostname}:5000${imagePreview}`}
+                            src={`${import.meta.env.VITE_API_URL || "http://localhost:5000"}${imagePreview}`}
                             alt="Preview"
                             className="w-full h-full object-cover"
                           />

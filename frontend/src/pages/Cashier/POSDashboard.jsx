@@ -40,7 +40,7 @@ export default function POSDashboard() {
     try {
       const token = localStorage.getItem("barbershop_token");
       const res = await axios.get(
-        `http://${window.location.hostname}:5000/api/queues`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/queues`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -55,7 +55,7 @@ export default function POSDashboard() {
     try {
       const token = localStorage.getItem("barbershop_token");
       const res = await axios.post(
-        `http://${window.location.hostname}:5000/api/queues`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/queues`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -88,7 +88,7 @@ export default function POSDashboard() {
     const fetchServices = async () => {
       try {
         const res = await axios.get(
-          `http://${window.location.hostname}:5000/api/services`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/services`,
         );
         const colors = [
           "bg-blue-900/40 border-blue-500",
@@ -153,7 +153,7 @@ export default function POSDashboard() {
     try {
       const token = localStorage.getItem("barbershop_token");
       const res = await axios.get(
-        `http://${window.location.hostname}:5000/api/members/${phoneToSearch}`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/members/${phoneToSearch}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -179,7 +179,7 @@ export default function POSDashboard() {
     try {
       const token = localStorage.getItem("barbershop_token");
       await axios.post(
-        `http://${window.location.hostname}:5000/api/members`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/members`,
         registerForm,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -219,7 +219,7 @@ export default function POSDashboard() {
     if (!idToValidate || !idToValidate.trim()) return;
     try {
       const res = await axios.get(
-        `http://${window.location.hostname}:5000/api/reservations/ticket/${idToValidate}`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations/ticket/${idToValidate}`,
       );
       const reservation = res.data;
 
@@ -228,7 +228,7 @@ export default function POSDashboard() {
       if (reservation.status === "pending") {
         // Update status to checked_in
         await axios.patch(
-          `http://${window.location.hostname}:5000/api/reservations/${reservation.id}/status`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations/${reservation.id}/status`,
           { status: "checked_in" },
           { headers: { Authorization: `Bearer ${token}` } },
         );
@@ -364,7 +364,7 @@ export default function POSDashboard() {
       };
 
       const txRes = await axios.post(
-        `http://${window.location.hostname}:5000/api/transactions`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/transactions`,
         payload,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -373,7 +373,7 @@ export default function POSDashboard() {
 
       if (selectedQueue) {
         await axios.patch(
-          `http://${window.location.hostname}:5000/api/queues/${selectedQueue.id}/complete`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/queues/${selectedQueue.id}/complete`,
           {},
           {
             headers: { Authorization: `Bearer ${token}` },

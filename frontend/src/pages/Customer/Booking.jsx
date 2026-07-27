@@ -78,8 +78,8 @@ export default function Booking() {
     const fetchData = async () => {
       try {
         const [servicesRes, kapstersRes] = await Promise.all([
-          axios.get(`http://${window.location.hostname}:5000/api/services`),
-          axios.get(`http://${window.location.hostname}:5000/api/kapsters`),
+          axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/services`),
+          axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/kapsters`),
         ]);
         setServices(servicesRes.data);
         setKapsters(kapstersRes.data.filter((k) => k.status === "active"));
@@ -106,7 +106,7 @@ export default function Booking() {
       if (selectedKapster && selectedDate) {
         try {
           const res = await axios.get(
-            `http://${window.location.hostname}:5000/api/reservations/booked-times?kapster_id=${selectedKapster}&date=${selectedDate}`,
+            `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations/booked-times?kapster_id=${selectedKapster}&date=${selectedDate}`,
           );
           setBookedTimes(res.data);
           // if currently selected time becomes booked, reset it
@@ -137,7 +137,7 @@ export default function Booking() {
       };
 
       const response = await axios.post(
-        `http://${window.location.hostname}:5000/api/reservations`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations`,
         payload,
       );
       navigate(`/ticket/${response.data.ticket_code}`);
@@ -275,7 +275,7 @@ export default function Booking() {
                         kapster.photo_url
                           ? kapster.photo_url.startsWith("http")
                             ? kapster.photo_url
-                            : `http://${window.location.hostname}:5000${kapster.photo_url}`
+                            : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${kapster.photo_url}`
                           : "https://placehold.co/150"
                       }
                       alt={kapster.name}

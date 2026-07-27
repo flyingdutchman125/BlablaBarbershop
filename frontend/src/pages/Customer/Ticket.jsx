@@ -24,7 +24,7 @@ export default function Ticket() {
     const fetchTicket = async () => {
       try {
         const response = await axios.get(
-          `http://${window.location.hostname}:5000/api/reservations/ticket/${ticketId}`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations/ticket/${ticketId}`,
         );
         setTicketData(response.data);
       } catch (error) {
@@ -53,7 +53,7 @@ export default function Ticket() {
     if (result.isConfirmed) {
       try {
         await axios.patch(
-          `http://${window.location.hostname}:5000/api/reservations/ticket/${ticketId}/cancel`,
+          `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations/ticket/${ticketId}/cancel`,
         );
         Swal.fire({
           title: "Dibatalkan!",

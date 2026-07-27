@@ -77,10 +77,10 @@ export default function ReservationFinance() {
     try {
       const token = localStorage.getItem("barbershop_token");
       const [resData, expData] = await Promise.all([
-        axios.get(`http://${window.location.hostname}:5000/api/reservations`, {
+        axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get(`http://${window.location.hostname}:5000/api/expenses`, {
+        axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/expenses`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
@@ -114,7 +114,7 @@ export default function ReservationFinance() {
     try {
       const token = localStorage.getItem("barbershop_token");
       await axios.patch(
-        `http://${window.location.hostname}:5000/api/reservations/${id}/status`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations/${id}/status`,
         { status: newStatus },
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -143,7 +143,7 @@ export default function ReservationFinance() {
     try {
       const token = localStorage.getItem("barbershop_token");
       await axios.post(
-        `http://${window.location.hostname}:5000/api/expenses`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/expenses`,
         expenseForm,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -184,7 +184,7 @@ export default function ReservationFinance() {
     try {
       const token = localStorage.getItem("barbershop_token");
       await axios.delete(
-        `http://${window.location.hostname}:5000/api/expenses/${id}`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/expenses/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },

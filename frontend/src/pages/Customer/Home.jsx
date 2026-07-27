@@ -15,8 +15,8 @@ export default function Home() {
     const fetchData = async () => {
       try {
         const [servicesRes, kapstersRes] = await Promise.all([
-          axios.get(`http://${window.location.hostname}:5000/api/services`),
-          axios.get(`http://${window.location.hostname}:5000/api/kapsters`),
+          axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/services`),
+          axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/kapsters`),
         ]);
         setServices(servicesRes.data);
         setKapsters(kapstersRes.data);
@@ -112,7 +112,7 @@ export default function Home() {
                     service.image_url
                       ? service.image_url.startsWith("http")
                         ? service.image_url
-                        : `http://${window.location.hostname}:5000${service.image_url}`
+                        : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${service.image_url}`
                       : "https://placehold.co/800"
                   }
                   alt={service.name}
@@ -168,7 +168,7 @@ export default function Home() {
                   kapster.photo_url
                     ? kapster.photo_url.startsWith("http")
                       ? kapster.photo_url
-                      : `http://${window.location.hostname}:5000${kapster.photo_url}`
+                      : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${kapster.photo_url}`
                     : "https://placehold.co/400x500"
                 }
                 alt={kapster.name}
