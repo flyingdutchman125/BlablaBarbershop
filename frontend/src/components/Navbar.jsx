@@ -82,7 +82,7 @@ export default function Navbar() {
                 className="flex items-center text-gray-300 hover:text-barber-gold transition-colors"
               >
                 <ShoppingBag className="w-5 h-5 mr-2" />
-                <span className="text-sm font-medium">Keranjang</span>
+                <span className="text-sm font-medium">Riwayat & Poin</span>
               </button>
               <Link
                 to={`/${import.meta.env.VITE_SECRET_CASHIER_PATH || "vY7tR4nL"}`}
