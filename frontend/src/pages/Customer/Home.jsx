@@ -110,7 +110,7 @@ export default function Home() {
                 <img
                   src={
                     service.image_url
-                      ? service.image_url.startsWith("http")
+                      ? service.image_url.startsWith("http") || service.image_url.startsWith("data:image")
                         ? service.image_url
                         : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${service.image_url}`
                       : "https://placehold.co/800"
@@ -166,10 +166,10 @@ export default function Home() {
               <img
                 src={
                   kapster.photo_url
-                    ? kapster.photo_url.startsWith("http")
+                    ? kapster.photo_url.startsWith("http") || kapster.photo_url.startsWith("data:image")
                       ? kapster.photo_url
                       : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${kapster.photo_url}`
-                    : "https://placehold.co/400x500"
+                    : "https://placehold.co/400x500/1e1e1e/d4af37?text=Kapster"
                 }
                 alt={kapster.name}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"

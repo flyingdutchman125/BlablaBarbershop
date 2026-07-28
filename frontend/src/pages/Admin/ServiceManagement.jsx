@@ -233,7 +233,7 @@ export default function ServiceManagement() {
                         {service.image_url ? (
                           <img
                             src={
-                              service.image_url.startsWith("http")
+                              service.image_url.startsWith("http") || service.image_url.startsWith("data:image")
                                 ? service.image_url
                                 : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${service.image_url}`
                             }

@@ -34,7 +34,7 @@ exports.createKapster = async (req, res) => {
     const { name, bio, status } = req.body;
     let photo_url = req.body.photo_url || "";
     if (req.file) {
-      photo_url = `/uploads/${req.file.filename}`;
+      photo_url = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
     }
     const [result] = await db.query(
       "INSERT INTO kapsters (name, bio, photo_url, status) VALUES (?, ?, ?, ?)",
@@ -54,7 +54,7 @@ exports.updateKapster = async (req, res) => {
     const { name, bio, status } = req.body;
     let photo_url = req.body.photo_url;
     if (req.file) {
-      photo_url = `/uploads/${req.file.filename}`;
+      photo_url = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
     }
     const [result] = await db.query(
       "UPDATE kapsters SET name = ?, bio = ?, photo_url = COALESCE(?, photo_url), status = ? WHERE id = ?",

@@ -30,7 +30,7 @@ exports.createService = async (req, res) => {
     const { name, description, price, duration_minutes } = req.body;
     let image_url = req.body.image_url || "";
     if (req.file) {
-      image_url = `/uploads/${req.file.filename}`;
+      image_url = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
     }
     const [result] = await db.query(
       "INSERT INTO services (name, description, price, duration_minutes, image_url) VALUES (?, ?, ?, ?, ?)",
@@ -50,7 +50,7 @@ exports.updateService = async (req, res) => {
     const { name, description, price, duration_minutes } = req.body;
     let image_url = req.body.image_url;
     if (req.file) {
-      image_url = `/uploads/${req.file.filename}`;
+      image_url = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
     }
     const [result] = await db.query(
       "UPDATE services SET name = ?, description = ?, price = ?, duration_minutes = ?, image_url = COALESCE(?, image_url) WHERE id = ?",

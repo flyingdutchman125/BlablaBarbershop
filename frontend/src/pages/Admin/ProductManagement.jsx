@@ -229,7 +229,7 @@ export default function ProductManagement() {
                         {product.image_url ? (
                           <img
                             src={
-                              product.image_url.startsWith("http")
+                              product.image_url.startsWith("http") || product.image_url.startsWith("data:image")
                                 ? product.image_url
                                 : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${product.image_url}`
                             }

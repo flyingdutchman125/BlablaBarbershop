@@ -273,7 +273,7 @@ export default function Booking() {
                     <img
                       src={
                         kapster.photo_url
-                          ? kapster.photo_url.startsWith("http")
+                          ? kapster.photo_url.startsWith("http") || kapster.photo_url.startsWith("data:image")
                             ? kapster.photo_url
                             : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${kapster.photo_url}`
                           : "https://placehold.co/150"

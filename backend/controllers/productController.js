@@ -15,7 +15,7 @@ exports.createProduct = async (req, res) => {
     const { name, price, stock } = req.body;
     let image_url = req.body.image_url || "";
     if (req.file) {
-      image_url = `/uploads/${req.file.filename}`;
+      image_url = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
     }
     const [result] = await db.query(
       "INSERT INTO products (name, price, stock, image_url) VALUES (?, ?, ?, ?)",
@@ -34,7 +34,7 @@ exports.updateProduct = async (req, res) => {
     const { name, price, stock } = req.body;
     let image_url = req.body.image_url;
     if (req.file) {
-      image_url = `/uploads/${req.file.filename}`;
+      image_url = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
     }
     await db.query(
       "UPDATE products SET name = ?, price = ?, stock = ?, image_url = COALESCE(?, image_url) WHERE id = ?",

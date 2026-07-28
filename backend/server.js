@@ -69,9 +69,17 @@ db.query(
   })
   .then(() => {
     // Add image_url to products if it doesn't exist
-    return db.query("ALTER TABLE products ADD COLUMN image_url VARCHAR(255) NULL DEFAULT NULL");
+    return db.query("ALTER TABLE products ADD COLUMN image_url LONGTEXT NULL DEFAULT NULL");
   })
-  .then(() => console.log("Added image_url to products"))
+  .then(() => {
+    // Modify existing columns to LONGTEXT to support Base64 images
+    return Promise.all([
+      db.query("ALTER TABLE products MODIFY COLUMN image_url LONGTEXT"),
+      db.query("ALTER TABLE kapsters MODIFY COLUMN photo_url LONGTEXT"),
+      db.query("ALTER TABLE services MODIFY COLUMN image_url LONGTEXT"),
+    ]);
+  })
+  .then(() => console.log("Added and modified image_url to support LONGTEXT"))
   .catch((err) => {
     if (err.code !== 'ER_DUP_FIELDNAME') {
       console.error("Error creating products table or altering products:", err);
