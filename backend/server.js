@@ -51,6 +51,7 @@ db.query(
     name VARCHAR(255) NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     stock INT DEFAULT 0,
+    image_url VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
 `
@@ -63,7 +64,17 @@ db.query(
   .then(() => console.log("Added product_id to reservations"))
   .catch((err) => {
     if (err.code !== 'ER_DUP_FIELDNAME') {
-      console.error("Error creating products table or altering reservations:", err);
+      console.error("Error altering reservations table:", err);
+    }
+  })
+  .then(() => {
+    // Add image_url to products if it doesn't exist
+    return db.query("ALTER TABLE products ADD COLUMN image_url VARCHAR(255) NULL DEFAULT NULL");
+  })
+  .then(() => console.log("Added image_url to products"))
+  .catch((err) => {
+    if (err.code !== 'ER_DUP_FIELDNAME') {
+      console.error("Error creating products table or altering products:", err);
     }
   });
 

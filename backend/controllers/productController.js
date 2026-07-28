@@ -13,11 +13,15 @@ exports.getAllProducts = async (req, res) => {
 exports.createProduct = async (req, res) => {
   try {
     const { name, price, stock } = req.body;
+    let image_url = req.body.image_url || "";
+    if (req.file) {
+      image_url = `/uploads/${req.file.filename}`;
+    }
     const [result] = await db.query(
-      "INSERT INTO products (name, price, stock) VALUES (?, ?, ?)",
-      [name, price, stock || 0],
+      "INSERT INTO products (name, price, stock, image_url) VALUES (?, ?, ?, ?)",
+      [name, price, stock || 0, image_url],
     );
-    res.status(201).json({ id: result.insertId, name, price, stock });
+    res.status(201).json({ id: result.insertId, name, price, stock, image_url });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -28,9 +32,13 @@ exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, price, stock } = req.body;
+    let image_url = req.body.image_url;
+    if (req.file) {
+      image_url = `/uploads/${req.file.filename}`;
+    }
     await db.query(
-      "UPDATE products SET name = ?, price = ?, stock = ? WHERE id = ?",
-      [name, price, stock, id],
+      "UPDATE products SET name = ?, price = ?, stock = ?, image_url = COALESCE(?, image_url) WHERE id = ?",
+      [name, price, stock, image_url, id],
     );
     res.json({ message: "Product updated successfully" });
   } catch (error) {

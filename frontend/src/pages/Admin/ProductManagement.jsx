@@ -13,7 +13,10 @@ export default function ProductManagement() {
     name: "",
     price: "",
     stock: "",
+    image_url: "",
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const fetchProducts = async () => {
     try {
@@ -35,14 +38,18 @@ export default function ProductManagement() {
   const handleOpenModal = (product = null) => {
     if (product) {
       setFormData(product);
+      setImagePreview(product.image_url || null);
     } else {
       setFormData({
         id: null,
         name: "",
         price: "",
         stock: "",
+        image_url: "",
       });
+      setImagePreview(null);
     }
+    setImageFile(null);
     setIsModalOpen(true);
   };
 
@@ -53,7 +60,10 @@ export default function ProductManagement() {
       name: "",
       price: "",
       stock: "",
+      image_url: "",
     });
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const handleChange = (e) => {
@@ -61,25 +71,42 @@ export default function ProductManagement() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("barbershop_token");
     const headers = {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
     };
+
+    const submitData = new FormData();
+    submitData.append("name", formData.name);
+    submitData.append("price", formData.price);
+    submitData.append("stock", formData.stock);
+    if (imageFile) {
+      submitData.append("photo", imageFile);
+    } else if (formData.image_url) {
+      submitData.append("image_url", formData.image_url);
+    }
 
     try {
       if (formData.id) {
         await axios.put(
           `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/products/${formData.id}`,
-          formData,
+          submitData,
           { headers },
         );
       } else {
         await axios.post(
           `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/products`,
-          formData,
+          submitData,
           { headers },
         );
       }
@@ -172,6 +199,7 @@ export default function ProductManagement() {
             <table className="w-full text-left">
               <thead className="bg-barber-black text-gray-400 text-sm">
                 <tr>
+                  <th className="px-6 py-4 font-medium">Gambar</th>
                   <th className="px-6 py-4 font-medium">Nama Produk</th>
                   <th className="px-6 py-4 font-medium">Harga</th>
                   <th className="px-6 py-4 font-medium">Stok</th>
@@ -181,13 +209,13 @@ export default function ProductManagement() {
               <tbody className="divide-y divide-gray-800">
                 {loading ? (
                   <tr>
-                    <td colSpan="4" className="text-center py-8 text-gray-500">
+                    <td colSpan="5" className="text-center py-8 text-gray-500">
                       Memuat data...
                     </td>
                   </tr>
                 ) : products.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="text-center py-8 text-gray-500">
+                    <td colSpan="5" className="text-center py-8 text-gray-500">
                       Belum ada data produk.
                     </td>
                   </tr>
@@ -197,6 +225,23 @@ export default function ProductManagement() {
                       key={product.id}
                       className="hover:bg-gray-800/50 transition-colors"
                     >
+                      <td className="px-6 py-4">
+                        {product.image_url ? (
+                          <img
+                            src={
+                              product.image_url.startsWith("http")
+                                ? product.image_url
+                                : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${product.image_url}`
+                            }
+                            alt={product.name}
+                            className="w-16 h-12 rounded-lg object-cover border border-gray-700"
+                          />
+                        ) : (
+                          <div className="w-16 h-12 rounded-lg bg-gray-800 flex items-center justify-center text-gray-500 text-xs">
+                            No img
+                          </div>
+                        )}
+                      </td>
                       <td className="px-6 py-4">
                         <p className="font-medium text-white">{product.name}</p>
                       </td>
@@ -291,6 +336,44 @@ export default function ProductManagement() {
                       className="w-full bg-barber-black border border-gray-700 text-white px-4 py-2 rounded-xl focus:border-barber-gold outline-none transition-colors"
                       placeholder="10"
                     />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Gambar Produk
+                  </label>
+                  <div className="relative border-2 border-dashed border-gray-700 rounded-xl p-4 text-center hover:border-barber-gold transition-colors bg-barber-black flex flex-col items-center justify-center min-h-[150px]">
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg, image/jpg, image/webp"
+                      onChange={handleImageChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    {imagePreview ? (
+                      <div className="relative w-full max-w-[200px] h-32 rounded-lg overflow-hidden border border-gray-600 mb-2">
+                        {imagePreview.startsWith("http") ||
+                        imagePreview.startsWith("blob") ? (
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <img
+                            src={`${import.meta.env.VITE_API_URL || "http://localhost:5000"}${imagePreview}`}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <div className="w-16 h-16 bg-gray-800 rounded-xl flex items-center justify-center mb-2">
+                        <Plus className="w-8 h-8 text-gray-500" />
+                      </div>
+                    )}
+                    <span className="text-sm text-gray-400">
+                      Drag & drop foto atau klik untuk memilih file
+                    </span>
                   </div>
                 </div>
               </div>

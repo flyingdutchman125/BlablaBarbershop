@@ -87,7 +87,6 @@ export default function ServiceManagement() {
     const token = localStorage.getItem("barbershop_token");
     const headers = {
       Authorization: `Bearer ${token}`,
-      "Content-Type": "multipart/form-data",
     };
 
     const submitData = new FormData();
