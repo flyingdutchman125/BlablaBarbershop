@@ -460,6 +460,9 @@ export default function POSDashboard() {
 
       // Refresh products to reflect new stock
       fetchProducts();
+      // Refresh daily stats
+      fetchTodayReservations();
+      fetchTodayExpenses();
 
       // Calculate per-item details for the receipt
       const receiptItems = cart.map(item => {
