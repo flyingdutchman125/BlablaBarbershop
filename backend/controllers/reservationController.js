@@ -21,7 +21,7 @@ exports.getAllReservations = async (req, res) => {
       LEFT JOIN kapsters k ON r.kapster_id = k.id
       LEFT JOIN services s ON r.service_id = s.id
       LEFT JOIN products p ON r.product_id = p.id
-      LEFT JOIN transactions t ON t.reservation_id = r.id
+      LEFT JOIN transactions t ON t.id = r.transaction_id OR t.reservation_id = r.id
       ORDER BY r.created_at DESC
     `);
     res.json(rows);
@@ -52,7 +52,7 @@ exports.getTodayReservations = async (req, res) => {
       LEFT JOIN kapsters k ON r.kapster_id = k.id
       LEFT JOIN services s ON r.service_id = s.id
       LEFT JOIN products p ON r.product_id = p.id
-      LEFT JOIN transactions t ON t.reservation_id = r.id
+      LEFT JOIN transactions t ON t.id = r.transaction_id OR t.reservation_id = r.id
       WHERE r.booking_date = ?
       ORDER BY r.booking_time ASC
     `, [today]);
@@ -196,7 +196,7 @@ exports.getReservationsByPhone = async (req, res) => {
       LEFT JOIN users u ON r.customer_id = u.id
       LEFT JOIN kapsters k ON r.kapster_id = k.id
       LEFT JOIN services s ON r.service_id = s.id
-      LEFT JOIN transactions t ON t.reservation_id = r.id
+      LEFT JOIN transactions t ON t.id = r.transaction_id OR t.reservation_id = r.id
       WHERE u.phone = ?
       ORDER BY r.created_at DESC
     `,

@@ -54,10 +54,12 @@ CREATE TABLE IF NOT EXISTS reservations (
   booking_date DATE NOT NULL,
   booking_time TIME NOT NULL,
   status ENUM('pending', 'checked_in', 'processing', 'completed', 'cancelled') DEFAULT 'pending',
+  transaction_id INT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (customer_id) REFERENCES users(id) ON DELETE SET NULL,
   FOREIGN KEY (kapster_id) REFERENCES kapsters(id) ON DELETE SET NULL,
-  FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE SET NULL
+  FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE SET NULL,
+  FOREIGN KEY (transaction_id) REFERENCES transactions(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS transactions (

@@ -106,10 +106,12 @@ exports.createTransaction = async (req, res) => {
       ],
     );
 
+    const newTransactionId = result.insertId;
+
     if (reservation_id) {
       await db.query(
-        "UPDATE reservations SET status = 'completed' WHERE id = ?",
-        [reservation_id],
+        "UPDATE reservations SET status = 'completed', transaction_id = ? WHERE id = ?",
+        [newTransactionId, reservation_id],
       );
     }
 
@@ -164,13 +166,13 @@ exports.createTransaction = async (req, res) => {
 
         if (isProduct) {
           await db.query(
-            "INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, product_id, booking_date, booking_time, status) VALUES (?, NULL, NULL, NULL, ?, ?, ?, 'completed')",
-            [ticket_code, item.id, today, time],
+            "INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, product_id, booking_date, booking_time, status, transaction_id) VALUES (?, NULL, NULL, NULL, ?, ?, ?, 'completed', ?)",
+            [ticket_code, item.id, today, time, newTransactionId],
           );
         } else {
           await db.query(
-            "INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, product_id, booking_date, booking_time, status) VALUES (?, NULL, NULL, ?, NULL, ?, ?, 'completed')",
-            [ticket_code, item.id, today, time],
+            "INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, product_id, booking_date, booking_time, status, transaction_id) VALUES (?, NULL, NULL, ?, NULL, ?, ?, 'completed', ?)",
+            [ticket_code, item.id, today, time, newTransactionId],
           );
         }
       }
