@@ -172,14 +172,14 @@ export default function POSDashboard() {
     fetchTodayExpenses();
   }, []);
 
-  // Event listener untuk tombol '1' sebagai shortcut antrian walk-in
+  // Event listener untuk tombol 'p' atau 'P' sebagai shortcut antrian walk-in
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Abaikan jika sedang mengetik di input text
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
         return;
 
-      if (e.key === "1") {
+      if (e.key.toLowerCase() === "p") {
         e.preventDefault();
         handleCreateQueue();
       }
