@@ -23,6 +23,7 @@ export default function POSDashboard() {
   const [todayReservations, setTodayReservations] = useState([]);
   const [showReservationsDropdown, setShowReservationsDropdown] = useState(false);
   const [availableProducts, setAvailableProducts] = useState([]);
+  const [todayExpenses, setTodayExpenses] = useState(0);
 
   const [memberSearchInput, setMemberSearchInput] = useState("");
   const [activeMember, setActiveMember] = useState(null);
@@ -65,6 +66,25 @@ export default function POSDashboard() {
       setTodayReservations(res.data);
     } catch (error) {
       console.error("Error fetching today reservations:", error);
+    }
+  };
+
+  const fetchTodayExpenses = async () => {
+    try {
+      const token = localStorage.getItem("barbershop_token");
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/expenses`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const todayStr = new Date().toLocaleDateString("sv-SE");
+      const expenses = res.data.filter(e => {
+        const d = new Date(e.expense_date).toLocaleDateString("sv-SE");
+        return d === todayStr;
+      });
+      const total = expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+      setTodayExpenses(total);
+    } catch (error) {
+      console.error("Error fetching expenses:", error);
     }
   };
 
@@ -149,6 +169,7 @@ export default function POSDashboard() {
     fetchTodayReservations();
     fetchServices();
     fetchProducts();
+    fetchTodayExpenses();
   }, []);
 
   // Event listener untuk tombol '1' sebagai shortcut antrian walk-in
@@ -372,6 +393,14 @@ export default function POSDashboard() {
     };
   }, [showScanner]); // handleTicketValidation updates implicitly
 
+  const totalQRIS = todayReservations
+    .filter(r => r.status === 'completed' && r.payment_method === 'qris')
+    .reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0);
+
+  const totalTunai = todayReservations
+    .filter(r => r.status === 'completed' && r.payment_method === 'cash')
+    .reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0);
+
   const serviceTotal = cart
     .filter((item) => item.type !== "product")
     .reduce((total, item) => total + parseFloat(item.price) * item.qty, 0);
@@ -584,6 +613,22 @@ export default function POSDashboard() {
               className="w-full bg-barber-darkgray border border-gray-700 text-white px-4 py-3 pl-12 rounded-xl focus:outline-none focus:border-barber-gold text-lg"
             />
             <Search className="absolute left-4 top-3.5 w-6 h-6 text-gray-400" />
+          </div>
+
+          {/* Daily Stats */}
+          <div className="flex space-x-4 mb-6">
+            <div className="bg-barber-darkgray border border-gray-700 p-4 rounded-xl flex-1 shadow-lg">
+              <p className="text-gray-400 text-xs mb-1 font-semibold uppercase tracking-wider">Pemasukan QRIS</p>
+              <h4 className="text-white font-bold text-xl">Rp {totalQRIS.toLocaleString("id-ID")}</h4>
+            </div>
+            <div className="bg-barber-darkgray border border-gray-700 p-4 rounded-xl flex-1 shadow-lg">
+              <p className="text-gray-400 text-xs mb-1 font-semibold uppercase tracking-wider">Pemasukan Tunai</p>
+              <h4 className="text-white font-bold text-xl">Rp {totalTunai.toLocaleString("id-ID")}</h4>
+            </div>
+            <div className="bg-barber-darkgray border border-gray-700 p-4 rounded-xl flex-1 shadow-lg">
+              <p className="text-gray-400 text-xs mb-1 font-semibold uppercase tracking-wider">Total Pengeluaran</p>
+              <h4 className="text-red-400 font-bold text-xl">Rp {todayExpenses.toLocaleString("id-ID")}</h4>
+            </div>
           </div>
 
           {/* Active Queues Section */}

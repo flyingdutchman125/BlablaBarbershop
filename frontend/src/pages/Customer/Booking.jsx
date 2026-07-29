@@ -14,17 +14,16 @@ import Swal from "sweetalert2";
 
 // Data kapsters dan services akan difetch dari API
 
-const generateTimeSlots = () => {
+const generateTimeSlots = (isFriday = false) => {
   const slots = [];
-  for (let i = 10; i <= 21; i++) {
+  const startHour = isFriday ? 13 : 10;
+  for (let i = startHour; i <= 21; i++) {
     slots.push(`${i}:00`);
     slots.push(`${i}:30`);
   }
   slots.push("22:00");
   return slots;
 };
-
-const timeSlots = generateTimeSlots();
 
 const generateDates = () => {
   const dates = [];
@@ -53,6 +52,7 @@ const generateDates = () => {
       dayName: i === 0 ? "Hari Ini" : i === 1 ? "Besok" : hari[d.getDay()],
       dateNum: d.getDate(),
       month: bulan[d.getMonth()],
+      isFriday: d.getDay() === 5,
     });
   }
   return dates;
@@ -69,6 +69,9 @@ export default function Booking() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [bookedTimes, setBookedTimes] = useState([]);
+  
+  const selectedDateObj = availableDates.find(d => d.fullDate === selectedDate);
+  const timeSlots = generateTimeSlots(selectedDateObj?.isFriday);
 
   const [services, setServices] = useState([]);
   const [kapsters, setKapsters] = useState([]);

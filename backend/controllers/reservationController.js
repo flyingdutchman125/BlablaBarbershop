@@ -14,6 +14,7 @@ exports.getAllReservations = async (req, res) => {
         COALESCE(s.name, p.name) as service_name, 
         COALESCE(s.price, p.price) as price,
         t.created_at as transaction_date,
+        t.payment_method,
         CASE WHEN r.product_id IS NOT NULL THEN 'product' ELSE 'service' END as item_type
       FROM reservations r
       LEFT JOIN users u ON r.customer_id = u.id
@@ -44,6 +45,7 @@ exports.getTodayReservations = async (req, res) => {
         COALESCE(s.name, p.name) as service_name, 
         COALESCE(s.price, p.price) as price,
         t.created_at as transaction_date,
+        t.payment_method,
         CASE WHEN r.product_id IS NOT NULL THEN 'product' ELSE 'service' END as item_type
       FROM reservations r
       LEFT JOIN users u ON r.customer_id = u.id

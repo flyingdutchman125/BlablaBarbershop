@@ -52,6 +52,14 @@ export default function ReservationFinance() {
     .filter((r) => r.status === "completed")
     .reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0);
 
+  const totalQRIS = filteredReservations
+    .filter((r) => r.status === "completed" && r.payment_method === "qris")
+    .reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0);
+
+  const totalTunai = filteredReservations
+    .filter((r) => r.status === "completed" && r.payment_method === "cash")
+    .reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0);
+
   const filteredExpenses = expenses.filter((e) => {
     const localDateStr = new Date(e.expense_date).toLocaleDateString("sv-SE"); // YYYY-MM-DD
     if (filterMode === "daily") {
@@ -309,9 +317,13 @@ export default function ReservationFinance() {
           <div className="bg-barber-darkgray p-6 rounded-2xl border border-gray-800 flex items-center justify-between lg:col-span-1">
             <div>
               <p className="text-gray-400 text-sm mb-1">Total Pemasukan</p>
-              <h3 className="text-2xl font-bold font-display text-green-400">
+              <h3 className="text-2xl font-bold font-display text-green-400 mb-2">
                 Rp {totalRevenue.toLocaleString("id-ID")}
               </h3>
+              <div className="flex flex-col space-y-1">
+                <span className="text-xs text-gray-400">QRIS: <span className="text-white font-medium">Rp {totalQRIS.toLocaleString("id-ID")}</span></span>
+                <span className="text-xs text-gray-400">Tunai: <span className="text-white font-medium">Rp {totalTunai.toLocaleString("id-ID")}</span></span>
+              </div>
             </div>
           </div>
 
