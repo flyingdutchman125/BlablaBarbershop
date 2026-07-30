@@ -67,13 +67,15 @@ CREATE TABLE IF NOT EXISTS transactions (
   receipt_number VARCHAR(50) NOT NULL UNIQUE,
   reservation_id INT,
   cashier_id INT,
+  kapster_id INT,
   total_amount DECIMAL(10, 2) NOT NULL,
   payment_method ENUM('cash', 'qris', 'transfer', 'debit') NOT NULL,
   amount_paid DECIMAL(10, 2) NOT NULL,
   change_amount DECIMAL(10, 2) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE SET NULL,
-  FOREIGN KEY (cashier_id) REFERENCES users(id) ON DELETE SET NULL
+  FOREIGN KEY (cashier_id) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (kapster_id) REFERENCES kapsters(id) ON DELETE SET NULL
 );
 
 -- Seed Data

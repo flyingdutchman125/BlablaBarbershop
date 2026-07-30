@@ -12,6 +12,7 @@ exports.createTransaction = async (req, res) => {
       member_phone,
       points_used,
       queue_number,
+      kapster_id,
     } = req.body;
 
     // Receipt number e.g. TRX-XXXXX
@@ -94,11 +95,12 @@ exports.createTransaction = async (req, res) => {
     }
 
     const [result] = await db.query(
-      "INSERT INTO transactions (receipt_number, reservation_id, cashier_id, total_amount, payment_method, amount_paid, change_amount) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO transactions (receipt_number, reservation_id, cashier_id, kapster_id, total_amount, payment_method, amount_paid, change_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
       [
         receipt_number,
         reservation_id || null,
         cashier_id,
+        kapster_id || null,
         total_amount,
         payment_method,
         amount_paid,
@@ -166,13 +168,13 @@ exports.createTransaction = async (req, res) => {
 
         if (isProduct) {
           await db.query(
-            "INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, product_id, booking_date, booking_time, status, transaction_id) VALUES (?, NULL, NULL, NULL, ?, ?, ?, 'completed', ?)",
-            [ticket_code, item.id, today, time, newTransactionId],
+            "INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, product_id, booking_date, booking_time, status, transaction_id) VALUES (?, NULL, ?, NULL, ?, ?, ?, 'completed', ?)",
+            [ticket_code, kapster_id || null, item.id, today, time, newTransactionId],
           );
         } else {
           await db.query(
-            "INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, product_id, booking_date, booking_time, status, transaction_id) VALUES (?, NULL, NULL, ?, NULL, ?, ?, 'completed', ?)",
-            [ticket_code, item.id, today, time, newTransactionId],
+            "INSERT INTO reservations (ticket_code, customer_id, kapster_id, service_id, product_id, booking_date, booking_time, status, transaction_id) VALUES (?, NULL, ?, ?, NULL, ?, ?, 'completed', ?)",
+            [ticket_code, kapster_id || null, item.id, today, time, newTransactionId],
           );
         }
       }

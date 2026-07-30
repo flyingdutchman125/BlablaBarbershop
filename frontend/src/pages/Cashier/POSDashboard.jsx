@@ -24,6 +24,8 @@ export default function POSDashboard() {
   const [showReservationsDropdown, setShowReservationsDropdown] = useState(false);
   const [availableProducts, setAvailableProducts] = useState([]);
   const [todayExpenses, setTodayExpenses] = useState(0);
+  const [kapsters, setKapsters] = useState([]);
+  const [selectedKapsterId, setSelectedKapsterId] = useState("");
 
   const [memberSearchInput, setMemberSearchInput] = useState("");
   const [activeMember, setActiveMember] = useState(null);
@@ -164,12 +166,26 @@ export default function POSDashboard() {
     }
   };
 
+  const fetchKapsters = async () => {
+    try {
+      const token = localStorage.getItem("barbershop_token");
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/kapsters`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setKapsters(res.data.filter(k => k.status === 'active'));
+    } catch (error) {
+      console.error("Error fetching kapsters:", error);
+    }
+  };
+
   useEffect(() => {
     fetchActiveQueues();
     fetchTodayReservations();
     fetchServices();
     fetchProducts();
     fetchTodayExpenses();
+    fetchKapsters();
   }, []);
 
   // Event listener untuk tombol 'p' atau 'P' sebagai shortcut antrian walk-in
@@ -437,6 +453,7 @@ export default function POSDashboard() {
         member_phone: activeMember ? activeMember.phone : null,
         points_used: (pointsToUseForService ? parseInt(pointsToUseForService) : 0) + (pointsToUseForProduct ? parseInt(pointsToUseForProduct) : 0),
         queue_number: selectedQueue ? selectedQueue.queue_number : null,
+        kapster_id: selectedKapsterId || null,
       };
 
       const txRes = await axios.post(
@@ -525,6 +542,7 @@ export default function POSDashboard() {
     setPointsToUseForService(0);
     setPointsToUseForProduct(0);
     setSelectedQueue(null);
+    setSelectedKapsterId("");
   };
 
   return (
@@ -731,6 +749,22 @@ export default function POSDashboard() {
                 {cart.length} Item
               </span>
             </div>
+          </div>
+
+          <div className="px-6 py-4 border-b border-gray-800 print:hidden">
+            <h3 className="font-display font-bold text-sm mb-2 text-gray-300">
+              Kapster / Barber
+            </h3>
+            <select
+              value={selectedKapsterId}
+              onChange={(e) => setSelectedKapsterId(e.target.value)}
+              className="w-full bg-barber-black border border-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-barber-gold"
+            >
+              <option value="">-- Pilih Kapster --</option>
+              {kapsters.map((k) => (
+                <option key={k.id} value={k.id}>{k.name}</option>
+              ))}
+            </select>
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
