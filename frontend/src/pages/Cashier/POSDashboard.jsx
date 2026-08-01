@@ -314,7 +314,7 @@ export default function POSDashboard() {
             { headers: { Authorization: `Bearer ${token}` } },
           );
         }
-        
+
         // Auto add reserved service to cart for payment
         const serviceToAdd = availableServices.find(
           (s) => s.id === reservation.service_id,
@@ -486,20 +486,20 @@ export default function POSDashboard() {
         const itemNormalTotal = parseFloat(item.price) * item.qty;
         let itemDiscount = 0;
         let itemDiscountText = "-";
-        
+
         if (item.type === "product") {
-           if (productTotal > 0 && finalProductDiscount > 0) {
-             itemDiscount = (itemNormalTotal / productTotal) * finalProductDiscount;
-             const pointsForThisItem = itemDiscount / 100;
-             itemDiscountText = `${Math.round(pointsForThisItem)} Poin`;
-           }
+          if (productTotal > 0 && finalProductDiscount > 0) {
+            itemDiscount = (itemNormalTotal / productTotal) * finalProductDiscount;
+            const pointsForThisItem = itemDiscount / 100;
+            itemDiscountText = `${Math.round(pointsForThisItem)} Poin`;
+          }
         } else {
-           if (serviceDiscountPercentage > 0) {
-             itemDiscount = itemNormalTotal * (serviceDiscountPercentage / 100);
-             itemDiscountText = `${serviceDiscountPercentage}% / ${serviceDiscountPercentage} Poin`;
-           }
+          if (serviceDiscountPercentage > 0) {
+            itemDiscount = itemNormalTotal * (serviceDiscountPercentage / 100);
+            itemDiscountText = `${serviceDiscountPercentage}% / ${serviceDiscountPercentage} Poin`;
+          }
         }
-        
+
         return {
           ...item,
           normalTotal: itemNormalTotal,
@@ -583,28 +583,28 @@ export default function POSDashboard() {
                 {showReservationsDropdown && (
                   <div className="absolute z-50 w-full mt-1 bg-barber-darkgray border border-gray-700 rounded-lg shadow-2xl max-h-60 overflow-y-auto">
                     {todayReservations
-                      .filter(r => 
-                         (r.status === 'pending' || r.status === 'checked_in') &&
-                         (r.customer_name.toLowerCase().includes(ticketInput.toLowerCase()) || 
+                      .filter(r =>
+                        (r.status === 'pending' || r.status === 'checked_in') &&
+                        (r.customer_name.toLowerCase().includes(ticketInput.toLowerCase()) ||
                           r.ticket_code.toLowerCase().includes(ticketInput.toLowerCase()))
-                       )
+                      )
                       .map((res) => (
-                      <div 
-                        key={res.id}
-                        className="p-3 border-b border-gray-800 hover:bg-gray-800 cursor-pointer flex justify-between items-center transition-colors"
-                        onClick={() => {
-                          setTicketInput(res.ticket_code);
-                          // Using setTimeout to allow state update before validating
-                          setTimeout(() => handleTicketValidation(res.ticket_code), 50);
-                        }}
-                      >
-                        <div>
-                          <div className="font-bold text-white text-sm">{res.customer_name}</div>
-                          <div className="text-xs text-gray-400">{res.service_name} • {res.booking_time}</div>
+                        <div
+                          key={res.id}
+                          className="p-3 border-b border-gray-800 hover:bg-gray-800 cursor-pointer flex justify-between items-center transition-colors"
+                          onClick={() => {
+                            setTicketInput(res.ticket_code);
+                            // Using setTimeout to allow state update before validating
+                            setTimeout(() => handleTicketValidation(res.ticket_code), 50);
+                          }}
+                        >
+                          <div>
+                            <div className="font-bold text-white text-sm">{res.customer_name}</div>
+                            <div className="text-xs text-gray-400">{res.service_name} • {res.booking_time}</div>
+                          </div>
+                          <div className="text-xs font-mono text-barber-gold">{res.ticket_code}</div>
                         </div>
-                        <div className="text-xs font-mono text-barber-gold">{res.ticket_code}</div>
-                      </div>
-                    ))}
+                      ))}
                     {todayReservations.filter(r => (r.status === 'pending' || r.status === 'checked_in')).length === 0 && (
                       <div className="p-4 text-center text-gray-500 text-sm">Tidak ada reservasi hari ini</div>
                     )}
@@ -678,11 +678,10 @@ export default function POSDashboard() {
                     onClick={() =>
                       setSelectedQueue(selectedQueue?.id === q.id ? null : q)
                     }
-                    className={`px-4 py-2 rounded-xl font-bold border-2 transition-colors ${
-                      selectedQueue?.id === q.id
+                    className={`px-4 py-2 rounded-xl font-bold border-2 transition-colors ${selectedQueue?.id === q.id
                         ? "bg-barber-gold text-black border-barber-gold"
                         : "bg-barber-darkgray text-white border-gray-700 hover:border-barber-gold"
-                    }`}
+                      }`}
                   >
                     {String(q.queue_number).padStart(3, "0")}
                   </button>
@@ -707,7 +706,7 @@ export default function POSDashboard() {
                 </span>
               </button>
             ))}
-            
+
             {availableProducts.map((product) => (
               <button
                 key={`prod-${product.id}`}
@@ -1184,12 +1183,6 @@ export default function POSDashboard() {
                   Password WiFi: Blabla234
                 </p>
               </div>
-              <p className="text-xs text-center mt-1">
-                __________________________
-              </p>
-              <p className="text-xs text-center mt-1">
-                __________________________
-              </p>
               <p className="text-xs text-center mt-1">
                 __________________________
               </p>
