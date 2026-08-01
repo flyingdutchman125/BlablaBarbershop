@@ -137,13 +137,9 @@ exports.createTransaction = async (req, res) => {
 
     // Insert walk-in reservations for the rest of the items and deduct stock for products
     const todayDate = new Date();
-    // Use local timezone offset trick for correct YYYY-MM-DD
-    const today = new Date(
-      todayDate.getTime() - todayDate.getTimezoneOffset() * 60000,
-    )
-      .toISOString()
-      .split("T")[0];
-    const time = todayDate.toTimeString().split(" ")[0];
+    // Use Asia/Jakarta timezone for date and time
+    const today = todayDate.toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
+    const time = todayDate.toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta" });
 
     for (const item of itemsToCreate) {
       let isProduct = item.type === "product";

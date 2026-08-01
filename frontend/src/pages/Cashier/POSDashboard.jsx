@@ -1180,6 +1180,9 @@ export default function POSDashboard() {
                 <p className="mt-2 font-semibold text-black">
                   Harap tunggu panggilan kasir
                 </p>
+                <p className="mt-2 font-bold text-black border-t border-dashed border-gray-300 pt-1">
+                  Password WiFi: Blabla234
+                </p>
               </div>
               <p className="text-xs text-center mt-1">
                 __________________________

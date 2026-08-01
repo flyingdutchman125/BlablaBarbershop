@@ -3,12 +3,7 @@ const db = require("../config/db");
 exports.createQueue = async (req, res) => {
   try {
     const todayDate = new Date();
-    // Gunakan offset timezone lokal agar resetnya tepat jam 00:00 (bukan jam 07:00 WIB)
-    const today = new Date(
-      todayDate.getTime() - todayDate.getTimezoneOffset() * 60000,
-    )
-      .toISOString()
-      .split("T")[0];
+    const today = todayDate.toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
 
     // Cari antrian terakhir hari ini
     const [rows] = await db.query(
@@ -40,11 +35,7 @@ exports.createQueue = async (req, res) => {
 exports.getActiveQueues = async (req, res) => {
   try {
     const todayDate = new Date();
-    const today = new Date(
-      todayDate.getTime() - todayDate.getTimezoneOffset() * 60000,
-    )
-      .toISOString()
-      .split("T")[0];
+    const today = todayDate.toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
     const [rows] = await db.query(
       "SELECT * FROM walkin_queues WHERE queue_date = ? AND status = 'waiting' ORDER BY queue_number ASC",
       [today],
