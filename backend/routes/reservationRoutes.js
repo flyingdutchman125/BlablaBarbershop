@@ -29,5 +29,11 @@ router.patch(
   requireRole(["cashier", "admin"]),
   reservationController.updateReservationStatus,
 );
+router.delete(
+  "/:id",
+  verifyToken,
+  requireRole(["admin"]),
+  reservationController.deleteReservation,
+);
 
 module.exports = router;

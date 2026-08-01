@@ -146,6 +146,44 @@ export default function ReservationFinance() {
     }
   };
 
+  const handleDeleteReservation = async (id) => {
+    const result = await Swal.fire({
+      title: "Hapus Laporan?",
+      text: "Data transaksi yang dibatalkan ini akan dihapus permanen.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#374151",
+      confirmButtonText: "Ya, Hapus",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const token = localStorage.getItem("barbershop_token");
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/reservations/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      Swal.fire({
+        title: "Terhapus",
+        text: "Laporan transaksi telah dihapus",
+        icon: "success",
+        confirmButtonColor: "#d4af37",
+      });
+      fetchReservations();
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.response?.data?.message || "Gagal menghapus",
+        icon: "error",
+        confirmButtonColor: "#d4af37",
+      });
+    }
+  };
+
   const handleAddExpense = async (e) => {
     e.preventDefault();
     try {
@@ -413,7 +451,7 @@ export default function ReservationFinance() {
                         Rp {parseInt(res.price).toLocaleString("id-ID")}
                       </td>
                       <td className="p-4">{getStatusBadge(res.status)}</td>
-                      <td className="p-4 print:hidden">
+                      <td className="p-4 print:hidden flex items-center space-x-2">
                         <select
                           className="bg-barber-black border border-gray-700 text-sm text-white rounded px-2 py-1 focus:outline-none"
                           value={res.status}
@@ -426,6 +464,15 @@ export default function ReservationFinance() {
                           <option value="completed">Selesai</option>
                           <option value="cancelled">Batal</option>
                         </select>
+                        {res.status === "cancelled" && (
+                          <button
+                            onClick={() => handleDeleteReservation(res.id)}
+                            className="text-gray-500 hover:text-red-500 transition-colors p-1 rounded"
+                            title="Hapus"
+                          >
+                            Hapus
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))

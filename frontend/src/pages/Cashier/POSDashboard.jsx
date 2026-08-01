@@ -36,6 +36,7 @@ export default function POSDashboard() {
     name: "",
     phone: "",
     birth_date: "",
+    referral_phone: "",
   });
 
   const [activeQueues, setActiveQueues] = useState([]);
@@ -279,7 +280,7 @@ export default function POSDashboard() {
       });
       setShowRegisterMember(false);
       setMemberSearchInput(registerForm.phone);
-      setRegisterForm({ name: "", phone: "", birth_date: "" });
+      setRegisterForm({ name: "", phone: "", birth_date: "", referral_phone: "" });
       setTimeout(() => {
         handleSearchMember();
       }, 500);
@@ -1112,6 +1113,23 @@ export default function POSDashboard() {
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   *Digunakan untuk bonus poin ulang tahun
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">
+                  No. WA Pengajak (Opsional)
+                </label>
+                <input
+                  type="text"
+                  className="w-full bg-barber-black border border-gray-700 text-white px-4 py-3 rounded-xl focus:outline-none focus:border-barber-gold"
+                  value={registerForm.referral_phone}
+                  onChange={(e) =>
+                    setRegisterForm({ ...registerForm, referral_phone: e.target.value })
+                  }
+                  placeholder="Contoh: 08123456789 (Jika ada)"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  *Member yang mengajak akan mendapat 10 poin
                 </p>
               </div>
             </div>

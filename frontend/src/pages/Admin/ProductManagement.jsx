@@ -13,6 +13,7 @@ export default function ProductManagement() {
     name: "",
     price: "",
     stock: "",
+    points: "",
     image_url: "",
   });
   const [imageFile, setImageFile] = useState(null);
@@ -45,6 +46,7 @@ export default function ProductManagement() {
         name: "",
         price: "",
         stock: "",
+        points: "",
         image_url: "",
       });
       setImagePreview(null);
@@ -60,6 +62,7 @@ export default function ProductManagement() {
       name: "",
       price: "",
       stock: "",
+      points: "",
       image_url: "",
     });
     setImageFile(null);
@@ -90,6 +93,7 @@ export default function ProductManagement() {
     submitData.append("name", formData.name);
     submitData.append("price", formData.price);
     submitData.append("stock", formData.stock);
+    submitData.append("points", formData.points);
     if (imageFile) {
       submitData.append("photo", imageFile);
     } else if (formData.image_url) {
@@ -203,6 +207,7 @@ export default function ProductManagement() {
                   <th className="px-6 py-4 font-medium">Nama Produk</th>
                   <th className="px-6 py-4 font-medium">Harga</th>
                   <th className="px-6 py-4 font-medium">Stok</th>
+                  <th className="px-6 py-4 font-medium">Poin Diberikan</th>
                   <th className="px-6 py-4 font-medium text-right">Aksi</th>
                 </tr>
               </thead>
@@ -250,6 +255,9 @@ export default function ProductManagement() {
                       </td>
                       <td className="px-6 py-4 text-gray-300">
                         {product.stock} pcs
+                      </td>
+                      <td className="px-6 py-4 text-green-400 font-bold">
+                        +{product.points || 0} Poin
                       </td>
                       <td className="px-6 py-4 text-right">
                         <button
@@ -335,6 +343,21 @@ export default function ProductManagement() {
                       min="0"
                       className="w-full bg-barber-black border border-gray-700 text-white px-4 py-2 rounded-xl focus:border-barber-gold outline-none transition-colors"
                       placeholder="10"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                      Poin yang Didapat
+                    </label>
+                    <input
+                      type="number"
+                      name="points"
+                      value={formData.points}
+                      onChange={handleChange}
+                      required
+                      min="0"
+                      className="w-full bg-barber-black border border-gray-700 text-white px-4 py-2 rounded-xl focus:border-barber-gold outline-none transition-colors"
+                      placeholder="Misal: 5"
                     />
                   </div>
                 </div>

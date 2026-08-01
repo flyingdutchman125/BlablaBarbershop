@@ -2,7 +2,7 @@ const db = require("../config/db");
 
 exports.registerMember = async (req, res) => {
   try {
-    const { name, phone, birth_date } = req.body;
+    const { name, phone, birth_date, referral_phone } = req.body;
 
     if (!name || !phone || !birth_date) {
       return res
@@ -24,6 +24,13 @@ exports.registerMember = async (req, res) => {
       "INSERT INTO members (name, phone, birth_date) VALUES (?, ?, ?)",
       [name, phone, birth_date],
     );
+
+    if (referral_phone && referral_phone !== phone) {
+      const [referrer] = await db.query("SELECT id FROM members WHERE phone = ?", [referral_phone]);
+      if (referrer.length > 0) {
+        await db.query("UPDATE members SET points = points + 10 WHERE id = ?", [referrer[0].id]);
+      }
+    }
 
     res.status(201).json({
       message: "Member registered successfully",

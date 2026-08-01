@@ -51,13 +51,12 @@ exports.createTransaction = async (req, res) => {
         // Calculate earned points from items
         const itemsList = items || [];
         for (const item of itemsList) {
-          if (item.type !== "product") {
-            if (item.name && item.name.toLowerCase().includes("casual"))
-              newPoints += 5 * item.qty;
-            if (item.name && item.name.toLowerCase().includes("clean"))
-              newPoints += 10 * item.qty;
-            if (item.name && item.name.toLowerCase().includes("grooming"))
-              newPoints += 20 * item.qty;
+          if (item.type === "product") {
+            const [prod] = await db.query("SELECT points FROM products WHERE id = ?", [item.id]);
+            if (prod.length > 0) newPoints += (prod[0].points || 0) * item.qty;
+          } else {
+            const [srv] = await db.query("SELECT points FROM services WHERE id = ?", [item.id]);
+            if (srv.length > 0) newPoints += (srv[0].points || 0) * item.qty;
           }
         }
 

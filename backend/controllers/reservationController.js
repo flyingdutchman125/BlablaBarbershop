@@ -287,3 +287,25 @@ exports.cancelReservationByTicket = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+exports.deleteReservation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Pastikan reservasi ada dan statusnya cancelled
+    const [rows] = await db.query("SELECT id, status FROM reservations WHERE id = ?", [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Reservasi tidak ditemukan" });
+    }
+    
+    if (rows[0].status !== "cancelled") {
+      return res.status(400).json({ message: "Hanya reservasi yang dibatalkan yang dapat dihapus" });
+    }
+    
+    await db.query("DELETE FROM reservations WHERE id = ?", [id]);
+    res.json({ message: "Laporan transaksi/reservasi berhasil dihapus" });
+  } catch (error) {
+    console.error("Error deleting reservation:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};

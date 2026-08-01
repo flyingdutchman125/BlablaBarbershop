@@ -14,6 +14,7 @@ export default function ServiceManagement() {
     description: "",
     price: "",
     duration_minutes: "",
+    points: "",
     image_url: "",
   });
   const [imageFile, setImageFile] = useState(null);
@@ -47,6 +48,7 @@ export default function ServiceManagement() {
         description: "",
         price: "",
         duration_minutes: "",
+        points: "",
         image_url: "",
       });
       setImagePreview(null);
@@ -63,6 +65,7 @@ export default function ServiceManagement() {
       description: "",
       price: "",
       duration_minutes: "",
+      points: "",
       image_url: "",
     });
     setImageFile(null);
@@ -94,6 +97,7 @@ export default function ServiceManagement() {
     submitData.append("description", formData.description);
     submitData.append("price", formData.price);
     submitData.append("duration_minutes", formData.duration_minutes);
+    submitData.append("points", formData.points);
     if (imageFile) {
       submitData.append("photo", imageFile);
     } else if (formData.image_url) {
@@ -207,6 +211,7 @@ export default function ServiceManagement() {
                   <th className="px-6 py-4 font-medium">Nama Layanan</th>
                   <th className="px-6 py-4 font-medium">Harga</th>
                   <th className="px-6 py-4 font-medium">Durasi (Menit)</th>
+                  <th className="px-6 py-4 font-medium">Poin Diberikan</th>
                   <th className="px-6 py-4 font-medium text-right">Aksi</th>
                 </tr>
               </thead>
@@ -257,6 +262,9 @@ export default function ServiceManagement() {
                       </td>
                       <td className="px-6 py-4 text-gray-300">
                         {service.duration_minutes} Menit
+                      </td>
+                      <td className="px-6 py-4 text-green-400 font-bold">
+                        +{service.points || 0} Poin
                       </td>
                       <td className="px-6 py-4 text-right">
                         <button
@@ -354,6 +362,21 @@ export default function ServiceManagement() {
                       min="1"
                       className="w-full bg-barber-black border border-gray-700 text-white px-4 py-2 rounded-xl focus:border-barber-gold outline-none transition-colors"
                       placeholder="30"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                      Poin yang Didapat
+                    </label>
+                    <input
+                      type="number"
+                      name="points"
+                      value={formData.points}
+                      onChange={handleChange}
+                      required
+                      min="0"
+                      className="w-full bg-barber-black border border-gray-700 text-white px-4 py-2 rounded-xl focus:border-barber-gold outline-none transition-colors"
+                      placeholder="Misal: 10"
                     />
                   </div>
                 </div>

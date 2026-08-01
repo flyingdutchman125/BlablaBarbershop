@@ -27,14 +27,14 @@ exports.getServiceById = async (req, res) => {
 
 exports.createService = async (req, res) => {
   try {
-    const { name, description, price, duration_minutes } = req.body;
+    const { name, description, price, duration_minutes, points } = req.body;
     let image_url = req.body.image_url || "";
     if (req.file) {
       image_url = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
     }
     const [result] = await db.query(
-      "INSERT INTO services (name, description, price, duration_minutes, image_url) VALUES (?, ?, ?, ?, ?)",
-      [name, description, price, duration_minutes, image_url],
+      "INSERT INTO services (name, description, price, duration_minutes, points, image_url) VALUES (?, ?, ?, ?, ?, ?)",
+      [name, description, price, duration_minutes, points || 0, image_url],
     );
     res
       .status(201)
@@ -47,14 +47,14 @@ exports.createService = async (req, res) => {
 
 exports.updateService = async (req, res) => {
   try {
-    const { name, description, price, duration_minutes } = req.body;
+    const { name, description, price, duration_minutes, points } = req.body;
     let image_url = req.body.image_url;
     if (req.file) {
       image_url = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
     }
     const [result] = await db.query(
-      "UPDATE services SET name = ?, description = ?, price = ?, duration_minutes = ?, image_url = COALESCE(?, image_url) WHERE id = ?",
-      [name, description, price, duration_minutes, image_url, req.params.id],
+      "UPDATE services SET name = ?, description = ?, price = ?, duration_minutes = ?, points = ?, image_url = COALESCE(?, image_url) WHERE id = ?",
+      [name, description, price, duration_minutes, points || 0, image_url, req.params.id],
     );
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Service not found" });
